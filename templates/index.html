@@ -10,15 +10,62 @@
     <link rel="stylesheet" href="/static/css/style.css?v=2">
 </head>
 <body>
-    <header class="site-header">
-        <div class="container">
-            <a href="#profile" class="brand">Annisa</a>
-            <nav>
-                <a href="#profile">Profile</a>
-                <a href="#skills">Skills</a>
-            </nav>
+    <!-- FLOATING NAVBAR -->
+<header class="floating-navbar">
+    <nav class="nav-pill">
+        <a href="#home" class="nav-link active">Home</a>
+        <a href="#about" class="nav-link">About</a>
+        <a href="#skills" class="nav-link">Skills</a>
+        <div class="nav-logo">⚡ ASA</div>
+        <a href="#experience" class="nav-link">Experience</a>
+        <a href="#projects" class="nav-link">Projects</a>
+        <a href="#contact" class="nav-link">Contact</a>
+    </nav>
+</header>
+
+<!-- HERO SECTION -->
+<section class="hero-section" id="home">
+    <div class="container">
+        
+        <!-- 1. Title -->
+        <div class="hero-header">
+            <span class="greeting-badge">Hello! 👋</span>
+            <h1 class="hero-title">
+                I'm <span class="highlight-text">Annisa</span>,<br>
+                Information Systems Student
+            </h1>
         </div>
-    </header>
+
+        <!-- 2. Grid 3 Kolom di Bawah Judul -->
+        <div class="hero-main-content">
+            
+            <!-- Left Card -->
+            <div class="hero-card left-card">
+                <span class="quote-mark">“</span>
+                <p>Passionate about creating intuitive user experiences and structured information systems.</p>
+            </div>
+
+            <!-- Center Image Area -->
+            <div class="hero-image-wrapper">
+                <div class="shape-backdrop"></div>
+                <img src="/static/img/MyPhoto(1).png" alt="Annisa Saskya Aulia" class="hero-profile-img">
+                
+                <div class="hero-cta-group">
+                    <a href="#projects" class="btn-primary">Portfolio ↗</a>
+                    <a href="#contact" class="btn-secondary">Hire Me</a>
+                </div>
+            </div>
+
+            <!-- Right Card -->
+            <div class="hero-card right-card">
+                <div class="rating-stars">★★★★★</div>
+                <h3 class="stat-number">UI '25</h3>
+                <p class="stat-label">Information Systems</p>
+            </div>
+
+        </div>
+    </div>
+</section>
 
     <main>
         <section class="hero" id="profile">
@@ -40,7 +87,7 @@
                         </div>
                         <div class="meta-row">
                             <dt>Program</dt>
-                            <dd>S1 Sistem Informasi</dd>
+                            <dd>S1 Information Systems</dd>
                         </div>
                     </dl>
                     <div class="social-links">
