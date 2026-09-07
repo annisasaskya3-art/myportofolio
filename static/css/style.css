@@ -198,3 +198,82 @@ h1, .brand {
         justify-content: flex-start;
     }
 }
+
+/* ===================================
+   SKILLS SECTION STYLES
+   =================================== */
+.skills-section {
+    padding: 4rem 0;
+    background-color: var(--bg-surface, #faf6f0);
+}
+
+.section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--ink, #1a1a1a);
+}
+
+.section-subtitle {
+    font-size: 1rem;
+    color: #666666;
+    margin-bottom: 2.5rem;
+}
+
+/* Menggunakan CSS Grid untuk Layout Cards (Poin Checklist Wajib) */
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.skill-card {
+    background: #fdfdfd;
+    border: 2px solid var(--ink, #1a1a1a);
+    border-radius: var(--radius, 12px);
+    padding: 1.75rem;
+    box-shadow: 4px 4px 0px var(--ink, #1a1a1a);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Efek Hover untuk Skill Cards*/
+/* Card Pertama saat di-hover (Kuning) */
+.skill-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 6px 6px 0px var(--ink, #1a1a1a);
+    background-color: #ff9359;
+}
+
+.skill-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.skill-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+    color: var(--ink, #1a1a1a);
+}
+
+.skill-card p {
+    font-size: 0.95rem;
+    color: #4a4a4a;
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
+}
+
+/* Flexbox untuk Badge/Tags Skill */
+.skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tag {
+    font-size: 0.8rem;
+    font-weight: 500;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+}
