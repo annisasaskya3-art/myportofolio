@@ -35,7 +35,7 @@
             <div class="hero-header">
                 <span class="greeting-badge">Welcome! 👋</span>
                 <h1 class="hero-title">
-                    To My <span class="highlight-text">Experiences Gallery </span>,<br>
+                    To My <span class="highlight-text">Experience Gallery </span>,<br>
                     Track Record & Activities
                 </h1>
             </div>
@@ -79,48 +79,22 @@
                 <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 2rem;">Experience</h1>
 
                 <div class="experience-grid">
-                    <!-- 1. COMPFEST 18 -->
-                    <article class="experience-card" style="background: #ffffff; border: 3px solid #000000; border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 5px 5px 0px #000000;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                            <span class="experience-category" style="background: #ffe3d8; color: #ff6b35; border: 1.5px solid #000; padding: 0.2rem 0.6rem; border-radius: 10px; font-size: 0.75rem; font-weight: 700;">
-                                Organization
-                            </span>
-                            <span style="color: #ff6b35; font-weight: 700; font-size: 0.85rem;">⚡ Ongoing</span>
-                        </div>
-                        <h2 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 0.5rem;">Staff of User Experience Academy at COMPFEST 18</h2>
-                        <p style="font-size: 0.95rem; color: #333; line-height: 1.5;">
-                            Engaged in intensive internal UI/UX training workshops, executed a full UI/UX redesign case study for Shopee by conducting heuristic evaluation, and contacted industry-expert professionals as academy mentors.
-                        </p>
-                    </article>
-
-                    <!-- 2. SIWAK-NG 2026 -->
-                    <article class="experience-card" style="background: #ffffff; border: 3px solid #000000; border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 5px 5px 0px #000000;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                            <span class="experience-category" style="background: #ffe3d8; color: #ff6b35; border: 1.5px solid #000; padding: 0.2rem 0.6rem; border-radius: 10px; font-size: 0.75rem; font-weight: 700;">
-                                Leadership
-                            </span>
-                            <span style="color: #ff6b35; font-weight: 700; font-size: 0.85rem;">⚡ Ongoing</span>
-                        </div>
-                        <h2 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 0.5rem;">Vice Project Officer at SIWAK-NG 2026</h2>
-                        <p style="font-size: 0.95rem; color: #333; line-height: 1.5;">
-                            Led technical operations and aligned cross-functional teams, oversaw visual identity and branding guidelines, and designed user-friendly visual assets to maximize engagement.
-                        </p>
-                    </article>
-
-                    <!-- 3. Future Fest 2026 -->
-                    <article class="experience-card" style="background: #ffffff; border: 3px solid #000000; border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 5px 5px 0px #000000;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                            <span class="experience-category" style="background: #ffe3d8; color: #ff6b35; border: 1.5px solid #000; padding: 0.2rem 0.6rem; border-radius: 10px; font-size: 0.75rem; font-weight: 700;">
-                                Public Speaking
-                            </span>
-                            <span style="color: #09ff00; font-weight: 700; font-size: 0.85rem;">✓ Completed</span>
-                        </div>
-                        <h2 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 0.5rem;">Guest Speaker & Event Staff at Future Fest 2026</h2>
-                        <p style="font-size: 0.95rem; color: #333; line-height: 1.5;">
-                            Authored complete Terms of Reference (TOR) and delivered an interactive motivational presentation on academic pathways for 100+ high school students while co-managing live event logistics.
-                        </p>
-                    </article>
-                </div>
+    {% for exp in experience_list %}
+        <article class="experience-card" style="background: #ffffff; border: 3px solid #000000; border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 5px 5px 0px #000000;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <span class="experience-category" style="background: #ffe3d8; color: #ff6b35; border: 1.5px solid #000; padding: 0.2rem 0.6rem; border-radius: 10px; font-size: 0.75rem; font-weight: 700;">
+                    {{ exp.category }}
+                </span>
+            </div>
+            <h2 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 0.5rem;">{{ exp.title }}</h2>
+            <p style="font-size: 0.95rem; color: #333; line-height: 1.5;">{{ exp.description }}</p>
+        </article>
+    {% empty %}
+        <div class="experience-card" style="text-align: center; padding: 2rem;">
+            <p style="font-weight: 700;">Belum ada pengalaman yang ditambahkan.</p>
+        </div>
+    {% endfor %}
+</div>
             </div>
         </section>
     </main>
