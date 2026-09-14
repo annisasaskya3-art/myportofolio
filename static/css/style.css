@@ -220,7 +220,6 @@ h1, .brand {
     margin-bottom: 2.5rem;
 }
 
-/* Menggunakan CSS Grid untuk Layout Cards (Poin Checklist Wajib) */
 .skills-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -236,8 +235,6 @@ h1, .brand {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Efek Hover untuk Skill Cards*/
-/* Card Pertama saat di-hover (Kuning) */
 .skill-card:hover {
     transform: translateY(-5px);
     box-shadow: 6px 6px 0px var(--ink, #1a1a1a);
@@ -262,7 +259,6 @@ h1, .brand {
     margin-bottom: 1.25rem;
 }
 
-/* Flexbox untuk Badge/Tags Skill */
 .skill-tags {
     display: flex;
     flex-wrap: wrap;
@@ -280,6 +276,9 @@ h1, .brand {
 
 /* ===================================
    FLOATING NAVBAR
+   (Konsolidasi: dulu ada 2x deklarasi .nav-link
+   dan 3x aturan .active/:hover yang saling
+   tabrakan. Sekarang cuma SATU sumber kebenaran.)
    =================================== */
 .floating-navbar {
     position: fixed;
@@ -288,7 +287,7 @@ h1, .brand {
     transform: translateX(-50%);
     z-index: 1000;
     width: 90%;
-    max-width: 900px;
+    max-width: 950px;
 }
 
 .nav-pill {
@@ -302,19 +301,14 @@ h1, .brand {
     box-shadow: 4px 4px 0px #ff6b35;
 }
 
-.nav-link {
+.brand-link {
     color: #ffffff;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
     text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 600;
-    padding: 0.4rem 1rem;
-    border-radius: 20px;
-    transition: all 0.2s ease;
-}
-
-.nav-link.active, .nav-link:hover {
-    background: #ff6b35;
-    color: #1a1a1a;
+    margin-right: 0.5rem;
+    white-space: nowrap;
 }
 
 .nav-logo {
@@ -324,17 +318,38 @@ h1, .brand {
     letter-spacing: 1px;
 }
 
+.nav-pill a.nav-link,
+.nav-pill a.nav-link:link,
+.nav-pill a.nav-link:visited {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    white-space: nowrap;
+    display: inline-block;
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.nav-pill a.nav-link:hover,
+.nav-pill a.nav-link.active {
+    background: #ff6b35;
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
 /* ===================================
    HERO SECTION LAYOUT
    =================================== */
 .hero-section {
-    padding-top: 140px; /* Jarak biar ga ketutup floating navbar */
+    padding-top: 140px;
     padding-bottom: 4rem;
     text-align: center;
 }
 
 .hero-header {
-    margin-bottom: 2.5rem; /* Jarak antara judul dan foto */
+    margin-bottom: 2.5rem;
     position: relative;
     z-index: 1;
 }
@@ -363,7 +378,6 @@ h1, .brand {
     color: #ff6b35;
 }
 
-/* Grid Layout 3 Kolom */
 .hero-main-content {
     display: grid;
     grid-template-columns: 1fr 280px 1fr;
@@ -373,7 +387,6 @@ h1, .brand {
     margin: 0 auto;
 }
 
-/* Container Tengah Foto & Shapes */
 .hero-image-wrapper {
     position: relative;
     height: 380px; 
@@ -403,11 +416,10 @@ h1, .brand {
     z-index: 2;
 }
 
-/* Floating Buttons di Bawah Foto */
 .hero-cta-group {
     position: relative;
     z-index: 3;
-    margin-bottom: -15px; /* Sedikit melayang di batas bawah */
+    margin-bottom: -15px;
     display: flex;
     gap: 0.5rem;
     background: #ffffff;
@@ -438,7 +450,6 @@ h1, .brand {
     font-size: 0.85rem;
 }
 
-/* Cards Kiri & Kanan */
 .hero-card {
     background: #ffffff;
     border: 3px solid #1a1a1a;
@@ -478,7 +489,6 @@ h1, .brand {
     margin: 0;
 }
 
-/* Responsif Mobile */
 @media (max-width: 850px) {
     .hero-main-content {
         grid-template-columns: 1fr;
