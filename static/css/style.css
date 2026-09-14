@@ -555,3 +555,72 @@ h1, .brand {
     font-size: 0.85rem;
     font-weight: 600;
 }
+
+/* ===================================
+   INTERACTIVE PROJECTS DECK CARD
+   =================================== */
+
+.project-deck-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 3rem 1rem;
+    perspective: 1000px; /* Bikin efek kedalaman 3D */
+}
+
+.project-card-3d {
+    background: #ffffff;
+    border: 3px solid #000000;
+    border-radius: 20px;
+    box-shadow: 6px 6px 0px #000000;
+    width: 320px;
+    padding: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efek membal halus */
+    cursor: pointer;
+    position: relative;
+    transform: scale(0.95) rotateY(5deg);
+    opacity: 0.85;
+}
+
+/* Kartu Tengah (Default Fokus) */
+.project-card-3d.featured {
+    transform: scale(1.05) translateZ(20px);
+    opacity: 1;
+    border-color: #000000;
+    box-shadow: 10px 10px 0px #ff6b35; /* Accent Oranye */
+    z-index: 2;
+}
+
+/* Efek pas di-HOVER (Maju & Keangkat Keluar) */
+.project-card-3d:hover {
+    transform: scale(1.1) translateY(-15px) translateZ(40px) rotateY(0deg) !important;
+    opacity: 1 !important;
+    box-shadow: 12px 12px 0px #000000 !important;
+    z-index: 10;
+}
+
+/* Styling Isi Kartu Proyek */
+.project-card-3d h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.project-card-3d .tech-tag {
+    display: inline-block;
+    background: #ffe3d8;
+    color: #ff6b35;
+    border: 1.5px solid #000000;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+}
+
+.project-card-3d p {
+    font-size: 0.9rem;
+    color: #333;
+    line-height: 1.4;
+}

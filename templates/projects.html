@@ -72,9 +72,32 @@
     </section>
 
     <main style="padding-top: 140px; padding-bottom: 4rem;">
-        <div class="container">
-            <h1>My Projects</h1>
-            <div class="project-grid">
+    <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 2rem; text-align: center;">My Project</h1>
+    <div class="project-deck-container">
+        <!-- Project 1: Material & Deck Design -->
+        <article class="project-card-3d featured">
+            <span class="tech-tag">Presentation Design</span>
+            <h2>Future Fest Presentaion as The Speaker</h2>
+            <p>
+                Merancang modul pelatihan dan presentasi interaktif topik <i>"Antara Ekspektasi dan Realita"</i> untuk 300+ peserta, serta mengevaluasi penyampaian materi.
+            </p>
+            <a href="" target="_blank" class="btn-secondary" style="margin-top: 1rem; display: inline-block; font-size: 0.8rem; padding: 0.4rem 0.8rem;">
+                View Project ↗
+            </a>
+        </article>
+
+        <!-- Project 2: Web Portfolio -->
+        <article class="project-card-3d">
+            <span class="tech-tag">Django, HTML & CSS</span>
+            <h2>Personal Portfolio Website</h2>
+            <p>
+                Mengembangkan website portofolio dinamis menggunakan Django MVT dengan antarmuka berbasis gaya visual Neo-Brutalism.
+            </p>
+            <a href="https://github.com/annisasaskya" target="_blank" class="btn-secondary" style="margin-top: 1rem; display: inline-block; font-size: 0.8rem; padding: 0.4rem 0.8rem;">
+                View Project ↗
+            </a>
+        </article>
+    </div>
                 {% for project in projects %}
                     <article class="project-card">
                         <h2>{{ project.title }}</h2>
@@ -85,7 +108,6 @@
                         {% endif %}
                     </article>
                 {% empty %}
-                    <p class="empty-state">Belum ada proyek yang ditambahkan. 🛠️</p>
                 {% endfor %}
             </div>
         </div>
