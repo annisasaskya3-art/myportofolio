@@ -125,7 +125,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']  # <-- DITAMBAHKAN DI SINI
+STATICFILES_DIRS = [BASE_DIR / 'static']  
 
 
 # Email
@@ -149,3 +149,5 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',  # Halaman/aplikasi main milikmu
 ]
+
+CSRF_TRUSTED_ORIGINS = ["https://annisa.saskya.pws.cs.ui.ac.id"]

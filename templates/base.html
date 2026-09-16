@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block meta %} {% endblock meta %}
+</head>
+<body>
+    <header class="floating-navbar">
+    <nav class="nav-pill">
+    <a href="{% url 'main:show_main' %}" class="brand-link">{{ name }}</a>
+    <a href="{% url 'main:show_main' %}" class="nav-link {% if request.resolver_match.url_name == 'show_main' %}active{% endif %}">Home</a>
+    <a href="{% url 'main:show_main' %}#about" class="nav-link">About</a>
+    <a href="{% url 'main:show_main' %}#skills" class="nav-link">Skills</a>
+    
+    <div class="nav-logo">⚡ ASA</div>
+    
+    <a href="{% url 'main:show_experience' %}" class="nav-link {% if request.resolver_match.url_name == 'show_experience' %}active{% endif %}">Experience</a>
+    <a href="{% url 'main:show_projects' %}" class="nav-link {% if request.resolver_match.url_name == 'show_projects' %}active{% endif %}">Projects</a>
+    <a href="{% url 'main:show_main' %}#contact" class="nav-link">Contact</a>
+    </nav>
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const navLinks = document.querySelectorAll(".nav-link");
+
+        navLinks.forEach(link => {
+            link.addEventListener("click", function () {
+                // Hapus kelas 'active' dari semua link navbar
+                navLinks.forEach(item => item.classList.remove("active"));
+                
+                // Tambahkan kelas 'active' ke link yang baru diklik
+                this.classList.add("active");
+            });
+        });
+    });
+    </script>
+    </header>  
+
+    {% block content %}
+    {% endblock content %}
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
+        </div>
+    </footer>
+</body>
+</html>
