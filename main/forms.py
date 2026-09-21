@@ -1,6 +1,7 @@
 from django.forms import ModelForm, TextInput, Textarea, URLInput
 
 from main.models import Project
+from main.models import Experience
 
 class ProjectForm(ModelForm):
     class Meta:
@@ -50,3 +51,8 @@ class ProjectForm(ModelForm):
                 }
             ),
         }
+
+class ExperienceForm(ModelForm):
+    class Meta:
+        model = Experience
+        fields = ["title", "company", "description", "is_current"]
