@@ -61,3 +61,32 @@ Ketika pengembang menambahkan atribut/field baru 'category = models.CharField(ma
 Dalam pengerjaan Tugas 2 ini, saya menggunakan AI (*Gemini*) sebagai *learning assistant / copilot* untuk:
 1. *Brainstorming* ide tata letak antarmuka gaya **Neo-Brutalism** (3D deck card perspective).
 2. Membantu penyusunan *unit test* dan pemecahan masalah (*troubleshooting*) saat terjadi kegagalan *assertion test*.
+
+### Tugas 3
+
+1. Jelaskan mengapa kita menggunakan ModelForm pada Django alih-alih membuat form HTML secara manual. Selain itu, jelaskan pula mengapa kita diwajibkan menambahkan {% csrf_token %} pada form tersebut!
+    - **ModelForm**: Memungkinkan Django secara otomatis membuat elemen form HTML berdasarkan struktur field pada model yang sudah kita definisikan. Ini menerapkan prinsip *Don't Repeat Yourself* (DRY), menghemat waktu penulisan kode, serta menangani validasi tipe data dan penyimpanan langsung ke database secara aman dan terstandar.
+    - **`{% csrf_token %}`**: Diwajibkan untuk mencegah serangan *Cross-Site Request Forgery* (CSRF). Token rahasia yang digenerate oleh server ini memastikan bahwa request bertipe `POST` benar-benar berasal dari pengguna sah melalui form di aplikasi web kita, bukan dari situs pihak ketiga yang berniat jahat.
+   
+2. Pada Tutorial 03, kita membahas format data JSON dan XML. Mengapa JSON lebih disukai dalam pengembangan aplikasi web modern dibandingkan XML?
+    - **Ukuran Berkas Lebih Ringan**: JSON menggunakan sintaks key-value sederhana tanpa tag penutup seperti XML, sehingga ukuran payload data lebih kecil dan menghemat bandwith.
+    - **Parsing Lebih Cepat**: JSON terintegrasi secara native dengan JavaScript (JavaScript Object Notation), sehingga aplikasi frontend modern dapat memproses data JSON jauh lebih cepat dan mudah dibanding XML yang membutuhkan sintaks DOM Parser relatif kompleks.
+    - **Keterbacaan**: Struktur JSON lebih bersih dan lebih gampang dibaca oleh pengembang (*human-readable*).
+3. Jelaskan alur yang terjadi saat kamu menggunakan fungsi view untuk mengembalikan data portofoliomu dalam bentuk JSON. Mengapa kita perlu melakukan proses serialization pada model Django sebelum datanya dikembalikan?
+    - **Alur Data**:
+     1. Client (Browser/Frontend) mengirimkan request HTTP GET ke URL endpoint JSON (misalnya `/experience/json/`).
+     2. Django mencocokkan URL di `urls.py` dan memanggil fungsi view yang sesuai (misalnya `show_json_experience`).
+     3. View mengeksekusi query ORM `Experience.objects.all()` untuk mengambil objek QuerySet dari database.
+     4. Objek QuerySet tersebut diserialisasi menjadi format string JSON menggunakan `serializers.serialize("json", data)`.
+     5. View mengembalikan response berupa `HttpResponse` bertipe `content_type="application/json"`.
+   - **Alasan Serialization**: Objek Python/Django QuerySet bersifat *complex Python objects* yang tidak bisa langsung dikirim via protokol HTTP atau dibaca oleh browser. Serialization berfungsi mengubah/menerjemahkan objek kompleks Django tersebut menjadi format standar teks murni (JSON) yang dapat ditransmisikan via jaringan dan dimengerti oleh sistem lain.
+
+### AI Disclosure Statement
+
+- **Tools yang Digunakan**: Gemini.
+- **Strategi Prompting**: Memberikan konteks penuh mengenai error terminal (IntegrityError, ImportError), potongan kode `views.py` dan `urls.py`, serta checklist instruksi dari SCELE untuk mendapatkan bimbingan perbaikan bertahap.
+- **Bagian yang Dibantu AI**:
+  - Penanganan resolusi error migrasi SQLite (`datatype mismatch`) dan perbaikan struktur import pada `urls.py`.
+  - Pembuatan fungsi CRUD & JSON delivery pada `views.py` untuk entity `Experience`.
+  - Menyusun jawaban atas pertanyaan reflektif Tugas 3 secara komprehensif.
+- **Analisis Kritis & Perbaikan Manual**: AI sangat membantu mempercepat penyusunan sintaks boilerplate Django dan isolasi error terminal. Namun, beberapa saran awal seperti pengerjaan prompt manual dalam terminal memerlukan penyesuaian penulisan string Python, sehingga dilakukan langkah reset migrasi secara bersih agar database lokal kembali normal dan konsisten dengan kebutuhan repositori. Selain itu, saya juga me-redo apa yang dikeluarkan oleh AI melalui prompt saya dan mempelajari mengapa kode tersebut bisa tersusun dan memberikan output dengan baik.
