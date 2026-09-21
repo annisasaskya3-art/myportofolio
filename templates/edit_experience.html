@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main style="padding: 3rem 0;">
+    <div class="container" style="max-width: 600px;">
+        <div style="background: #ffffff; border: 3px solid #000000; border-radius: 16px; padding: 2rem; box-shadow: 6px 6px 0px #000000;">
+            <h2 style="font-weight: 800; margin-bottom: 1.5rem;">Edit Experience</h2>
+            
+            <form method="POST">
+                {% csrf_token %}
+                <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;">
+                    {{ form.as_p }}
+                </div>
+                
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="submit" style="background: #fde047; color: #000; border: 2px solid #000; padding: 0.5rem 1.2rem; border-radius: 8px; font-weight: 700; cursor: pointer;">
+                        Update
+                    </button>
+                    <a href="{% url 'main:show_experience' %}" style="background: #e5e7eb; color: #000; border: 2px solid #000; padding: 0.5rem 1.2rem; border-radius: 8px; font-weight: 700; text-decoration: none;">
+                        Batal
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+{% endblock %}
