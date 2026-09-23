@@ -1,7 +1,6 @@
-# Create your models here.
-
 import uuid
 from django.db import models
+from django.contrib.auth.models import User  # Tambahkan import ini agar User terdeteksi!
 
 class Experience(models.Model):
     EXPERIENCE_CHOICES = [
@@ -28,22 +27,20 @@ class Experience(models.Model):
     def is_ongoing(self):
         return self.ended_at is None
 
+
 class Project(models.Model):
-    title = models.CharField(max_length = 200)
+    title = models.CharField(max_length=200)
     description = models.TextField()
     tech_stack = models.CharField(max_length=200)
-    project_url = models.URLField(blank=True, null = True)
-    project_image_url = models.URLField(blank=True, null=True) 
+    project_url = models.URLField(blank=True, null=True)
+    project_image_url = models.URLField(blank=True, null=True, max_length=500)
+
+    # Field ManyToMany dengan User
+    starred_by = models.ManyToManyField(
+        User, 
+        related_name="starred_projects", 
+        blank=True
+    )
 
     def __str__(self):
         return self.title
-
-class Experience(models.Model):
-    title = models.CharField(max_length=100)
-    company = models.CharField(max_length = 100)
-    description = models. TextField()
-    is_current = models.BooleanField(default = False)
-    created_at = models.DateTimeField(auto_now_add = True)
-
-    def __str__(self):
-        return f"{self.title} at {self.company}"

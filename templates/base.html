@@ -12,18 +12,38 @@
 </head>
 <body>
     <header class="floating-navbar">
-    <nav class="nav-pill">
-    <a href="{% url 'main:show_main' %}" class="brand-link">{{ name }}</a>
-    <a href="{% url 'main:show_main' %}" class="nav-link {% if request.resolver_match.url_name == 'show_main' %}active{% endif %}">Home</a>
-    <a href="{% url 'main:show_main' %}#about" class="nav-link">About</a>
-    <a href="{% url 'main:show_main' %}#skills" class="nav-link">Skills</a>
-    
-    <div class="nav-logo">⚡ ASA</div>
-    
-    <a href="{% url 'main:show_experience' %}" class="nav-link {% if request.resolver_match.url_name == 'show_experience' %}active{% endif %}">Experience</a>
-    <a href="{% url 'main:show_projects' %}" class="nav-link {% if request.resolver_match.url_name == 'show_projects' %}active{% endif %}">Projects</a>
-    <a href="{% url 'main:show_main' %}#contact" class="nav-link">Contact</a>
-    </nav>
+        <nav class="nav-pill">
+            <a href="{% url 'main:show_main' %}" class="brand-link">{{ name }}</a>
+            <a href="{% url 'main:show_main' %}" class="nav-link {% if request.resolver_match.url_name == 'show_main' %}active{% endif %}">Home</a>
+            <a href="{% url 'main:show_main' %}#about" class="nav-link">About</a>
+            <a href="{% url 'main:show_main' %}#skills" class="nav-link">Skills</a>
+            
+            <div class="nav-logo">⚡ ASA</div>
+            
+            <a href="{% url 'main:show_experience' %}" class="nav-link {% if request.resolver_match.url_name == 'show_experience' %}active{% endif %}">Experience</a>
+            <a href="{% url 'main:show_projects' %}" class="nav-link {% if request.resolver_match.url_name == 'show_projects' %}active{% endif %}">Projects</a>
+            <a href="{% url 'main:show_main' %}#contact" class="nav-link">Contact</a>
+
+            <!-- Kondisi Autentikasi User -->
+            {% if user.is_authenticated %}
+                <span class="nav-link"><b>{{ user.username }}</b></span>
+                <a href="{% url 'main:logout' %}" class="nav-link">Logout</a>
+            {% else %}
+                <a href="{% url 'main:login' %}" class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}">Login</a>
+                <a href="{% url 'main:register' %}" class="nav-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}">Register</a>
+            {% endif %}
+        </nav>
+    </header>  
+
+    {% block content %}
+    {% endblock content %}
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
+        </div>
+    </footer>
+
     <script>
     document.addEventListener("DOMContentLoaded", function () {
         const navLinks = document.querySelectorAll(".nav-link");
@@ -38,16 +58,40 @@
             });
         });
     });
+
+    // Fungsi utilitas untuk membaca nilai cookie berdasarkan kuncinya
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    function tambahData() {
+            const csrftoken = getCookie('csrftoken');
+
+            fetch("{% url 'main:create_project' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrftoken
+            },
+                body: JSON.stringify({
+                    // Data yang dikirim
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            });
+        }
     </script>
-    </header>  
-
-    {% block content %}
-    {% endblock content %}
-
-    <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
-        </div>
-    </footer>
 </body>
 </html>

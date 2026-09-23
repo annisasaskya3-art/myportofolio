@@ -13,16 +13,21 @@
                 
                 <div class="project-header">
                     <h1 style="font-size: 2.5rem; font-weight: 800;">My Projects</h1>
-                    <a href="{% url 'main:create_project' %}"
-                       class="button project-add-button btn-primary">
-                        <span aria-hidden="true">+</span>
-                        Tambah Proyek
-                    </a>
+                    
+                    <!-- HANYA TAMPILKAN TOMBOL TAMBAH UNTUK SUPERUSER -->
+                    {% if user.is_superuser %}
+                        <a href="{% url 'main:create_project' %}"
+                           class="button project-add-button btn-primary">
+                            <span aria-hidden="true">+</span>
+                            Tambah Proyek
+                        </a>
+                    {% endif %}
                 </div>
 
                 <form method="get"
                       action="{% url 'main:show_projects' %}"
                       class="project-search">
+                      {% csrf_token %}
                     <input type="search"
                            name="title"
                            value="{{ title_query }}"
@@ -32,10 +37,8 @@
                     <button type="submit" class="button btn-primary">Cari</button>
                 </form>
 
-
                 <div class="project-deck-container experience-grid project-grid">
                     {% for project in project_list %}
-                        
                         <article class="project-card-3d experience-card">
                             {% if project.project_image_url %}
                                 <img src="{{ project.project_image_url }}"
@@ -54,10 +57,15 @@
                                         <a href="{{ project.project_url }}" target="_blank" class="btn-secondary button" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
                                             View Project ↗
                                         </a>
-                                        {% endif %}
+                                    {% endif %}
                                     
-                                    
-                                    {% include "components/project_delete_modal.html" with project=project %}
+                                    <!-- TOMBOL STAR DIPASANG DI SINI -->
+                                    {% include "components/project_star.html" with project=project %}
+
+                                    <!-- HANYA TAMPILKAN MODAL/TOMBOL HAPUS JIKA USER ADALAH SUPERUSER -->
+                                    {% if user.is_superuser %}
+                                        {% include "components/project_delete_modal.html" with project=project %}
+                                    {% endif %}
                                 </div>
                             </div>
                         </article>

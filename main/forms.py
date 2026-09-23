@@ -55,4 +55,4 @@ class ProjectForm(ModelForm):
 class ExperienceForm(ModelForm):
     class Meta:
         model = Experience
-        fields = ["title", "company", "description", "is_current"]
+        fields = ["title", "description", "category", "thumbnail"]
