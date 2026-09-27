@@ -36,11 +36,12 @@ class Project(models.Model):
     project_image_url = models.URLField(blank=True, null=True, max_length=500)
 
     # Field ManyToMany dengan User
-    starred_by = models.ManyToManyField(
+    stars = models.ManyToManyField(
         User, 
         related_name="starred_projects", 
         blank=True
     )
-
+    def total_stars(self):
+        return self.stars.count()
     def __str__(self):
         return self.title

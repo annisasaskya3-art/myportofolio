@@ -1,4 +1,5 @@
 from django.urls import path
+from main import views
 from main.views import (
     show_main,
     show_experience,
@@ -35,8 +36,10 @@ urlpatterns = [
     # --- PROJECT URLS ---
     path("projects/", show_projects, name="show_projects"),
     path("projects/add/", create_project, name="create_project"),
+    path("projects/edit/<int:project_id>/", views.edit_project, name="edit_project"),
     path("projects/<int:project_id>/delete/", delete_project, name="delete_project"),  
     path("api/projects/", get_projects_json, name="get_projects_json"),
+    path("projects/<int:project_id>/star/", toggle_star, name="toggle_star"),
     
     # --- DATA DELIVERY URLS ---
     path("xml/", show_xml, name="show_xml"),
@@ -47,6 +50,4 @@ urlpatterns = [
     path("register/", register, name="register"),
     path("login/", login_user, name="login"),
     path("logout/", logout_user, name="logout"),
-
-    path("projects/<int:project_id>/star/", toggle_star, name="toggle_star"),
 ]
