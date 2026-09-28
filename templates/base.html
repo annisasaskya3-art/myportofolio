@@ -24,13 +24,42 @@
             <a href="{% url 'main:show_projects' %}" class="nav-link {% if request.resolver_match.url_name == 'show_projects' %}active{% endif %}">Projects</a>
             <a href="{% url 'main:show_main' %}#contact" class="nav-link">Contact</a>
 
-            <!-- Kondisi Autentikasi User -->
             {% if user.is_authenticated %}
-                <span class="nav-link"><b>{{ user.username }}</b></span>
-                <a href="{% url 'main:logout' %}" class="nav-link">Logout</a>
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-left: auto;">
+                    
+                    <!-- 1. BADGE NAMA USER (Pill Oranye Khas Portofolio) -->
+                    <span style="background-color: #ff5722; 
+                                color: #ffffff; 
+                                padding: 0.35rem 0.85rem; 
+                                border-radius: 9999px; 
+                                font-size: 0.8rem; 
+                                font-weight: 600; 
+                                white-space: nowrap;">
+                        Hi, {{ user.username }}
+                    </span>
+
+                    <!-- 2. GARIS PEMISAH TIPIS -->
+                    <div style="width: 1px; height: 16px; background-color: #4b5563;"></div>
+
+                    <!-- 3. TOMBOL LOGOUT (Teks Bersih & Simpel) -->
+                    <a href="{% url 'main:logout' %}" 
+                    style="color: #e5e7eb; 
+                            font-size: 0.85rem; 
+                            font-weight: 500; 
+                            text-decoration: none; 
+                            white-space: nowrap; 
+                            transition: color 0.2s;"
+                    onmouseover="this.style.color='#ef4444'" 
+                    onmouseout="this.style.color='#e5e7eb'">
+                        Logout
+                    </a>
+
+                </div>
             {% else %}
-                <a href="{% url 'main:login' %}" class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}">Login</a>
-                <a href="{% url 'main:register' %}" class="nav-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}">Register</a>
+                <a href="{% url 'main:login' %}" 
+                style="background-color: #ff5722; color: #ffffff; padding: 0.35rem 0.85rem; border-radius: 9999px; text-decoration: none; font-size: 0.8rem; font-weight: 600;">
+                    Login
+                </a>
             {% endif %}
         </nav>
     </header>  

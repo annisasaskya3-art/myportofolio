@@ -10,15 +10,16 @@ from main.views import (
     show_projects,
     create_project,
     get_projects_json,
+    edit_project,
     delete_project, 
-    show_xml,
-    show_json,
-    show_xml_by_id,
-    show_json_by_id,
     register,
     login_user,
     logout_user,
     toggle_star,
+    show_xml,
+        show_json,
+        show_xml_by_id,
+        show_json_by_id,
 )
 
 app_name = "main"

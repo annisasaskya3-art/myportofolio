@@ -5,7 +5,6 @@ from main.models import Project
 class MainTest(TestCase):
     def setUp(self):
         self.client = Client()
-        # Buat data dummy yang cocok sama judul barumu
         self.project = Project.objects.create(
             title="Future Fest Presentation as The Speaker",
             description="Merancang modul pelatihan dan presentasi interaktif.",
