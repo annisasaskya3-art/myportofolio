@@ -62,8 +62,10 @@
                                     <!-- TOMBOL STAR DIPASANG DI SINI -->
                                     {% include "components/project_star.html" with project=project %}
                                     
-                                    {% if user.is_superuser or is_editor%}
-                                        {%include "components/project_edit_modal.html" with project=project%}
+                                    {% if user.is_superuser or is_editor %}
+                                        <a href="{% url 'main:edit_project' project.id %}"
+                                        class="btn-secondary button"
+                                        style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">Edit</a>
                                     {% endif %}
 
                                     <!-- HANYA TAMPILKAN MODAL/TOMBOL HAPUS JIKA USER ADALAH SUPERUSER -->

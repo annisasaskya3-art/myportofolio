@@ -92,9 +92,10 @@ Dalam pengerjaan Tugas 2 ini, saya menggunakan AI (*Gemini*) sebagai *learning a
 - **Analisis Kritis & Perbaikan Manual**: AI sangat membantu mempercepat penyusunan sintaks boilerplate Django dan isolasi error terminal. Namun, beberapa saran awal seperti pengerjaan prompt manual dalam terminal memerlukan penyesuaian penulisan string Python, sehingga dilakukan langkah reset migrasi secara bersih agar database lokal kembali normal dan konsisten dengan kebutuhan repositori. Selain itu, saya juga me-redo apa yang dikeluarkan oleh AI melalui prompt saya dan mempelajari mengapa kode tersebut bisa tersusun dan memberikan output dengan baik.
 
 ### AI Disclosure Statement (Individual Assignment 4)
-Dalam pengerjaan Assignment 4 ini, saya menggunakan bantuan AI (Gemini) untuk:
+Dalam pengerjaan Assignment 4 ini, saya menggunakan bantuan AI (Gemini dan Claude) untuk:
 1. Membantu perancangan matriks otorisasi (4 Role Access Control) pada sisi Django view dan membantu menyelesaikan kode error pada projects.html.
+2. Untuk brainstorming kode error di bagian add projects dan add experiences
 
-**Penyesuaian Manual yang Dilakukan:**
-* Menyelaraskan nama endpoint URL dengan struktur `urls.py` yang sudah ada pada Tugas 3.
+*Penyesuaian Manual yang Dilakukan:*
+* Menyelaraskan nama endpoint URL dengan struktur urls.py yang sudah ada pada Tugas 3.
 * Mempelajari output kode yang dikeluarkan oleh Gemini dan mempelajari mengapa kode tersebut bisa tersusun seperti itu.

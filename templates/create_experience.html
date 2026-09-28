@@ -2,68 +2,33 @@
 
 {% block content %}
 <main style="padding: 3rem 0;">
-    <div class="container" style="max-width: 600px; margin: 0 auto;">
-        <div style="background: #ffffff; border: 3px solid #1a1a1a; border-radius: 20px; padding: 2rem; box-shadow: 6px 6px 0px #1a1a1a;">
-            
-            <h2 style="font-size: 1.75rem; font-weight: 800; color: #1a1a1a; margin-bottom: 1.5rem; text-align: center;">
-                Tambah Experience
-            </h2>
+  <div class="container" style="max-width: 600px; margin: 0 auto;">
+    <div class="form-card">
+      <h2 class="form-card__title">Tambah Experience</h2>
 
-            <form method="POST" style="display: flex; flex-direction: column; gap: 1.25rem;">
-                {% csrf_token %}
+      <form method="POST" class="styled-form">
+        {% csrf_token %}
 
-                <!-- Title Input -->
-                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-                    <label style="font-size: 0.9rem; font-weight: 700; color: #1a1a1a;">Title</label>
-                    <input type="text" name="title" required placeholder="Contoh: Frontend Developer Intern" 
-                           style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #1a1a1a; border-radius: 10px; font-size: 0.95rem; outline: none; transition: all 0.2s;"
-                           onfocus="this.style.borderColor='#ff6b35'" onblur="this.style.borderColor='#1a1a1a'">
-                </div>
+        {% if form.non_field_errors %}
+          <div class="form-error">{{ form.non_field_errors }}</div>
+        {% endif %}
 
-                <!-- Description Input -->
-                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-                    <label style="font-size: 0.9rem; font-weight: 700; color: #1a1a1a;">Description</label>
-                    <textarea name="description" rows="4" required placeholder="Tuliskan deskripsi pengalamanmu..."
-                              style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #1a1a1a; border-radius: 10px; font-size: 0.95rem; resize: vertical; outline: none; transition: all 0.2s;"
-                              onfocus="this.style.borderColor='#ff6b35'" onblur="this.style.borderColor='#1a1a1a'"></textarea>
-                </div>
+        {% for field in form %}
+          <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% for error in field.errors %}
+              <p class="form-error">{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endfor %}
 
-                <!-- Category Select -->
-                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-                    <label style="font-size: 0.9rem; font-weight: 700; color: #1a1a1a;">Category</label>
-                    <select name="category" style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #1a1a1a; border-radius: 10px; font-size: 0.95rem; background: #fff; outline: none;">
-                        <option value="Full-Time">Full-Time</option>
-                        <option value="Part-Time">Part-Time</option>
-                        <option value="Internship">Internship</option>
-                        <option value="Organizational">Organizational</option>
-                    </select>
-                </div>
-
-                <!-- Thumbnail Input -->
-                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-                    <label style="font-size: 0.9rem; font-weight: 700; color: #1a1a1a;">Thumbnail URL</label>
-                    <input type="url" name="thumbnail" placeholder="https://..." 
-                           style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #1a1a1a; border-radius: 10px; font-size: 0.95rem; outline: none; transition: all 0.2s;"
-                           onfocus="this.style.borderColor='#ff6b35'" onblur="this.style.borderColor='#1a1a1a'">
-                </div>
-
-                <!-- Action Buttons -->
-                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                    <button type="submit" 
-                            style="flex: 1; padding: 0.75rem; background-color: #ff6b35; color: #ffffff; font-weight: 700; border: 2px solid #1a1a1a; border-radius: 10px; box-shadow: 3px 3px 0px #1a1a1a; cursor: pointer; transition: all 0.15s;"
-                            onmouseover="this.style.transform='translate(-1px, -1px)'; this.style.boxShadow='4px 4px 0px #1a1a1a';"
-                            onmouseout="this.style.transform='none'; this.style.boxShadow='3px 3px 0px #1a1a1a';">
-                        Simpan
-                    </button>
-                    <a href="{% url 'main:show_experience' %}" 
-                       style="flex: 1; text-align: center; padding: 0.75rem; background-color: #e5e7eb; color: #1a1a1a; font-weight: 700; border: 2px solid #1a1a1a; border-radius: 10px; box-shadow: 3px 3px 0px #1a1a1a; text-decoration: none; transition: all 0.15s;"
-                       onmouseover="this.style.transform='translate(-1px, -1px)'; this.style.boxShadow='4px 4px 0px #1a1a1a';"
-                       onmouseout="this.style.transform='none'; this.style.boxShadow='3px 3px 0px #1a1a1a';">
-                        Batal
-                    </a>
-                </div>
-            </form>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Simpan</button>
+          <a href="{% url 'main:show_experience' %}" class="btn-secondary">Batal</a>
         </div>
+      </form>
     </div>
+  </div>
 </main>
 {% endblock %}

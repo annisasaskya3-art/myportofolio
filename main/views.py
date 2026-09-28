@@ -10,6 +10,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.decorators import login_required 
 from django.core.exceptions import PermissionDenied 
 from django.http import HttpResponse, HttpResponseForbidden 
+from django.views.decorators.http import require_POST
 
 from main.models import Experience, Project
 from main.forms import ProjectForm, ExperienceForm
@@ -34,16 +35,10 @@ def show_main(request):
 # --- EXPERIENCE VIEWS ---
 
 def show_experience(request):
-    json_response = show_json_experience(request)
-    experiences = serializers.deserialize(
-        "json",
-        json_response.content.decode("utf-8"),
-    )
-    experiences = [exp.object for exp in experiences]
-
     context = {
-        "name": "Annisa Saskya Aulia", 
-        "experience_list": experiences,
+        "name": "Annisa Saskya Aulia",
+        "experience_list": Experience.objects.order_by("-started_at"),
+        "can_edit": request.user.is_superuser or is_editor(request.user),
     }
     return render(request, "experience.html", context)
 
@@ -104,20 +99,16 @@ def show_json_experience(request):
 # --- PROJECT VIEWS ---
 
 def show_projects(request):
-    json_response = get_projects_json(request)
-
-    projects = serializers.deserialize(
-        "json",
-        json_response.content.decode("utf-8"),
-    )
-    projects = [project.object for project in projects]
     title_query = request.GET.get("title", "").strip()
+    projects = Project.objects.prefetch_related("stars").order_by("-id")
+    if title_query:
+        projects = projects.filter(title__icontains=title_query)
 
     context = {
-        "name": "Annisa Saskya Aulia",  
+        "name": "Annisa Saskya Aulia",
         "project_list": projects,
         "title_query": title_query,
-        'is_editor': is_editor(request.user),
+        "is_editor": is_editor(request.user),
     }
     return render(request, "projects.html", context)  
 
@@ -141,12 +132,11 @@ def create_project(request):
     return render(request, "projects_form.html", context)
 
 @login_required(login_url= "/login/")
-def edit_project(request, id):
+def edit_project(request, project_id):
+    project = get_object_or_404(Project, pk=project_id)
+    form = ProjectForm(request.POST or None, instance=project)
     if not (request.user.is_superuser or is_editor(request.user)):
         return HttpResponseForbidden("403 Forbidden: Anda tidak memiliki akses untuk mengubah proyek.")
-
-    project = get_object_or_404(Project, pk=id)
-    form = ProjectForm(request.POST or None, instance=project)
 
     if request.method == "POST" and form.is_valid():
         form.save()
@@ -159,7 +149,7 @@ def edit_project(request, id):
         "project" : project,
     }
 
-    return render(request, "edit_project.html", context)
+    return render(request, "projects_form.html", context)
 
 @login_required(login_url="/login/") 
 def delete_project(request, project_id):
@@ -216,16 +206,14 @@ def logout_user(request):
 # --- FEATURE & SERIALIZER VIEWS ---
 
 @login_required(login_url="/login/")
+@require_POST
 def toggle_star(request, project_id):
-    project = get_object_or_404(Project, id=project_id)
+    project = get_object_or_404(Project, pk=project_id)
 
-    if request.method == "POST":
-        # Kalau akun ini sudah pernah memberi star, batalkan star-nya.
-        # Kalau belum, tambahkan star.
-        if request.user in project.starred_by.all():
-            project.starred_by.remove(request.user)
-        else:
-            project.starred_by.add(request.user)
+    if project.stars.filter(pk=request.user.pk).exists():
+        project.stars.remove(request.user)
+    else:
+        project.stars.add(request.user)
 
     return redirect("main:show_projects")
 
@@ -255,7 +243,6 @@ def get_projects_json(request):
     if title_query:
         projects = projects.filter(title__icontains=title_query)
 
-    # Tambahkan use_natural_foreign_keys=True di sini
     projects_json = serializers.serialize(
         "json", 
         projects, 

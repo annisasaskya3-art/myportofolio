@@ -283,16 +283,62 @@ h1, .brand {
     max-width: 950px;
 }
 
+/* Container Utama Grid 3 Kolom */
 .nav-pill {
     background: #1a1a1a;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr; /* Kiri - Tengah (ASA) - Kanan */
     align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem 1.5rem !important; 
+    padding: 0.6rem 1.5rem;
     border-radius: 50px;
     border: 3px solid #1a1a1a;
     box-shadow: 4px 4px 0px #ff6b35;
-    gap: 0.5rem;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Kelompok Menu Kiri & Kanan */
+.nav-group-left,
+.nav-group-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* Memberikan jarak napas yang cukup antar menu */
+}
+
+.nav-group-right {
+    justify-content: flex-end; /* Dorong menu kanan & auth ke pojok kanan */
+}
+
+/* Brand ASA di Paling Tengah */
+.nav-brand-center {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 0 1rem;
+}
+
+/* Link Menu Navigasi */
+.nav-pill a.nav-link {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.4rem 1rem !important; /* Jarak kanan-kiri kapsul lebih lega */
+    border-radius: 20px;
+    white-space: nowrap;
+    display: inline-block;
+    transition: all 0.2s ease-in-out;
+}
+
+.nav-pill a.nav-link:hover,
+.nav-pill a.nav-link.active {
+    background: #ff6b35 !important;
+    color: #ffffff;
 }
 
 .brand-link {
@@ -303,36 +349,6 @@ h1, .brand {
     text-decoration: none;
     margin-right: 0.5rem;
     white-space: nowrap;
-}
-
-.nav-logo {
-    color: #ffffff;
-    font-weight: 800;
-    font-size: 1.1rem;
-    letter-spacing: 1px;
-}
-
-.nav-pill a.nav-link,
-.nav-pill a.nav-link:link,
-.nav-pill a.nav-link:visited {
-    color: #ffffff;
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 600;
-    padding: 0.3rem 0.9rem;
-    border-radius: 20px;
-    white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    margin: 0 2px;
-    transition: all 0.2s ease-in-out;
-}
-
-.nav-pill a.nav-link:hover,
-.nav-pill a.nav-link.active {
-    background: #ff6b35;
-    color: #ffffff;
-    transform: translateY(-1px);
 }
 
 /* HERO SECTION LAYOUT */

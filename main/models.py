@@ -45,3 +45,5 @@ class Project(models.Model):
         return self.stars.count()
     def __str__(self):
         return self.title
+    class Meta:
+        ordering = ["-id"]

@@ -11,61 +11,57 @@
     {% block meta %} {% endblock meta %}
 </head>
 <body>
-    <header class="floating-navbar">
-        <nav class="nav-pill">
-            <a href="{% url 'main:show_main' %}" class="brand-link">{{ name }}</a>
+<header class="floating-navbar" style="width: 100%; display: flex; justify-content: center; padding: 1rem 0;">
+    <nav class="nav-pill" style="background: #1a1a1a; display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 1.25rem; border-radius: 50px; border: 3px solid #1a1a1a; box-shadow: 4px 4px 0px #ff6b35; width: 100%; max-width: 1200px; gap: 1rem;">
+        
+        <!-- KELOMPOK KIRI -->
+        <div style="display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0;">
+            <a href="{% url 'main:show_main' %}" style="color: #fff; font-weight: 800; font-size: 0.9rem; text-decoration: none; margin-right: 0.4rem; white-space: nowrap;">{{ name }}</a>
             <a href="{% url 'main:show_main' %}" class="nav-link {% if request.resolver_match.url_name == 'show_main' %}active{% endif %}">Home</a>
             <a href="{% url 'main:show_main' %}#about" class="nav-link">About</a>
             <a href="{% url 'main:show_main' %}#skills" class="nav-link">Skills</a>
-            
-            <div class="nav-logo">⚡ ASA</div>
-            
+        </div>
+        
+        <!-- CENTER LOGO -->
+        <div style="font-weight: 800; font-size: 1.1rem; color: #ffffff; white-space: nowrap; flex-shrink: 0;">
+            <span style="color: #ff6b35;">⚡</span> ASA
+        </div>
+        
+        <!-- KELOMPOK KANAN -->
+        <div style="display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0;">
             <a href="{% url 'main:show_experience' %}" class="nav-link {% if request.resolver_match.url_name == 'show_experience' %}active{% endif %}">Experience</a>
             <a href="{% url 'main:show_projects' %}" class="nav-link {% if request.resolver_match.url_name == 'show_projects' %}active{% endif %}">Projects</a>
             <a href="{% url 'main:show_main' %}#contact" class="nav-link">Contact</a>
 
             {% if user.is_authenticated %}
-                <div style="display: flex; align-items: center; gap: 0.75rem; margin-left: auto;">
-                    
-                    <!-- 1. BADGE NAMA USER (Pill Oranye Khas Portofolio) -->
-                    <span style="background-color: #ff5722; 
-                                color: #ffffff; 
-                                padding: 0.35rem 0.85rem; 
-                                border-radius: 9999px; 
-                                font-size: 0.8rem; 
-                                font-weight: 600; 
-                                white-space: nowrap;">
+                <div style="display: inline-flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
+                    <span style="background-color: #ff5722; color: #ffffff; padding: 0.3rem 0.75rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 600;">
                         Hi, {{ user.username }}
                     </span>
-
-                    <!-- 2. GARIS PEMISAH TIPIS -->
-                    <div style="width: 1px; height: 16px; background-color: #4b5563;"></div>
-
-                    <!-- 3. TOMBOL LOGOUT (Teks Bersih & Simpel) -->
-                    <a href="{% url 'main:logout' %}" 
-                    style="color: #e5e7eb; 
-                            font-size: 0.85rem; 
-                            font-weight: 500; 
-                            text-decoration: none; 
-                            white-space: nowrap; 
-                            transition: color 0.2s;"
-                    onmouseover="this.style.color='#ef4444'" 
-                    onmouseout="this.style.color='#e5e7eb'">
+                    <span style="color: #4b5563;">|</span>
+                    <a href="{% url 'main:logout' %}" style="color: #e5e7eb; font-size: 0.85rem; font-weight: 500; text-decoration: none;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#e5e7eb'">
                         Logout
                     </a>
-
                 </div>
             {% else %}
-                <a href="{% url 'main:login' %}" 
-                style="background-color: #ff5722; color: #ffffff; padding: 0.35rem 0.85rem; border-radius: 9999px; text-decoration: none; font-size: 0.8rem; font-weight: 600;">
-                    Login
-                </a>
+                <div style="display: inline-flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
+                    <a href="{% url 'main:login' %}" class="nav-link">Login</a>
+                    <a href="{% url 'main:register' %}" style="background-color: #ff5722; color: #ffffff; padding: 0.3rem 0.75rem; border-radius: 9999px; text-decoration: none; font-size: 0.8rem; font-weight: 600;">Register</a>
+                </div>
             {% endif %}
-        </nav>
-    </header>  
+        </div>
+    </nav>
+</header>
 
-    {% block content %}
-    {% endblock content %}
+{% if messages %}
+    <div class="container messages">
+        {% for message in messages %}
+            <div class="message message--{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% block content %}{% endblock content %}
 
     <footer class="site-footer">
         <div class="container">
