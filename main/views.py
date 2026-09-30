@@ -9,7 +9,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.decorators import login_required 
 from django.core.exceptions import PermissionDenied 
-from django.http import HttpResponse, HttpResponseForbidden 
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseBadRequest
 from django.views.decorators.http import require_POST
 
 from main.models import Experience, Project
@@ -98,19 +98,16 @@ def show_json_experience(request):
 
 # --- PROJECT VIEWS ---
 
+
 def show_projects(request):
     title_query = request.GET.get("title", "").strip()
-    projects = Project.objects.prefetch_related("stars").order_by("-id")
-    if title_query:
-        projects = projects.filter(title__icontains=title_query)
 
     context = {
         "name": "Annisa Saskya Aulia",
-        "project_list": projects,
         "title_query": title_query,
-        "is_editor": is_editor(request.user),
+        "form": ProjectForm(),
     }
-    return render(request, "projects.html", context)  
+    return render(request, "projects.html", context)
 
 @login_required(login_url="/login/") 
 def create_project(request):
@@ -237,15 +234,66 @@ def show_json_by_id(request, id):
     return HttpResponse(serializers.serialize("json", data), content_type="application/json")
 
 def get_projects_json(request):
-    title_query = request.GET.get("title", "").strip()
-    projects = Project.objects.all()
+    query = request.GET.get('q', '').strip()
+    projects = Project.objects.all().order_by('-pk')
+    if query:
+        projects = projects.filter(title__icontains=query)
 
-    if title_query:
-        projects = projects.filter(title__icontains=title_query)
+    can_edit = request.user.is_superuser or is_editor(request.user)
+    can_delete = request.user.is_superuser
 
-    projects_json = serializers.serialize(
-        "json", 
-        projects, 
-        use_natural_foreign_keys=True
-    )
-    return HttpResponse(projects_json, content_type="application/json")
+    data = []
+    for p in projects:
+        data.append({
+            'id': p.id,
+            'title': p.title,
+            'description': p.description,
+            'category': getattr(p, 'tech_stack', '') or 'Project',
+            'project_url': getattr(p, 'project_url', '') or '',
+            'image_url': p.image.url if getattr(p, 'image', None) else None,
+            'stars_count': p.stars.count(),
+            'is_starred': request.user.is_authenticated and p.stars.filter(pk=request.user.pk).exists(),
+            'can_edit': can_edit,
+            'can_delete': can_delete,
+        })
+    return JsonResponse(data, safe=False)
+
+@login_required(login_url='/auth/login')
+def add_project_ajax(request):
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        tech_stack = request.POST.get('tech_stack')
+        description = request.POST.get('description')
+        project_url = request.POST.get('project_url', '')
+
+        if title and description:
+            new_project = Project(
+                title=title,
+                tech_stack=tech_stack, # Sesuaikan nama field pada model Project kamu
+                description=description,
+                project_url=project_url,
+                user=request.user
+            )
+            new_project.save()
+
+            return HttpResponse(b"CREATED", status=201)
+
+    return HttpResponseBadRequest()
+
+@require_POST
+def create_project_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"message": "Hanya pemilik portofolio yang dapat menambahkan proyek."},
+            status=403,
+        )
+
+    form = ProjectForm(request.POST)
+    if form.is_valid():
+        project = form.save()
+        return JsonResponse(
+            {"message": "Proyek berhasil ditambahkan.", "pk": str(project.id)},
+            status=201,
+        )
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)

@@ -1,0 +1,25 @@
+<div id="toast" class="toast-container hide" style="position: fixed; bottom: 30px; right: 30px; z-index: 9999; pointer-events: none;">
+    <div class="toast-content" style="background: #1a1a1a; color: #ffffff; padding: 1rem 1.5rem; border-radius: 12px; border: 2px solid #ff6b35; box-shadow: 4px 4px 0px #ff6b35; min-width: 250px;">
+        <strong id="toast-title" style="display: block; font-size: 0.9rem; font-weight: 700; color: #ff6b35; margin-bottom: 0.25rem;"></strong>
+        <span id="toast-message" style="font-size: 0.85rem;"></span>
+    </div>
+</div>
+
+<script>
+function showToast(title, message, type = 'success') {
+    const toast = document.getElementById('toast');
+    const toastTitle = document.getElementById('toast-title');
+    const toastMessage = document.getElementById('toast-message');
+
+    if (!toast) return;
+
+    toastTitle.textContent = title;
+    toastMessage.textContent = message;
+
+    toast.classList.remove('hide');
+
+    setTimeout(() => {
+        toast.classList.add('hide');
+    }, 3000);
+}
+</script>

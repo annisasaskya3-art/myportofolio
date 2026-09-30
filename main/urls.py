@@ -19,6 +19,8 @@ from main.views import (
     show_json,
     show_xml_by_id,
     show_json_by_id,
+    add_project_ajax,
+    create_project_ajax,
 )
 
 app_name = "main"
@@ -46,6 +48,8 @@ urlpatterns = [
     path("json/", show_json, name="show_json"),
     path("xml/<str:id>/", show_xml_by_id, name="show_xml_by_id"),
     path("json/<str:id>/", show_json_by_id, name="show_json_by_id"),
+    path("projects/add-ajax/", create_project_ajax, name="create_project_ajax"),
+
 
     # --- AUTH ---
     path("register/", register, name="register"),

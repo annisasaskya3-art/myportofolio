@@ -5,6 +5,40 @@
 {% endblock meta %}
 
 {% block content %}
+<style>
+    .project-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 2px dashed #1c1917;
+    }
+    .pa-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font: inherit;
+        font-size: 0.8rem;
+        font-weight: 700;
+        line-height: 1;
+        padding: 0.5rem 0.85rem;
+        background: #fff;
+        color: #1c1917;
+        border: 2px solid #1c1917;
+        border-radius: 8px;
+        text-decoration: none;
+        cursor: pointer;
+        box-shadow: 2px 2px 0 #1c1917;
+        transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .pa-btn:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 #1c1917; }
+    .pa-btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 #1c1917; }
+    .pa-btn--primary { background: #d95d39; color: #fff; }
+    .pa-btn--star.is-starred, .pa-btn--edit { background: #fde047; }
+    .pa-btn--danger { background: #ef4444; color: #fff; }
+</style>
     <!-- MAIN SECTION -->
     <main style="padding-top: 140px; padding-bottom: 4rem;">
         <section class="experience-section" id="experience">
@@ -12,23 +46,24 @@
                 <p class="section-kicker" style="text-align: center;">Karya yang saya bangun</p>
                 
                 <div class="project-header">
+                    <button class="button button-secondary" onclick="showToast('Notifikasi Sistem', 'Project berhasil dimuat dengan baik!', 'success')">
+                        Test Toast Notifikasi
+                    </button>
                     <h1 style="font-size: 2.5rem; font-weight: 800;">My Projects</h1>
                     
                     <!-- HANYA TAMPILKAN TOMBOL TAMBAH UNTUK SUPERUSER -->
                     {% if user.is_superuser %}
-                        <a href="{% url 'main:create_project' %}"
-                           class="button project-add-button btn-primary">
-                            <span aria-hidden="true">+</span>
-                            Tambah Proyek
-                        </a>
+                        <button type="button" class="button project-add-button btn-primary"
+                                popovertarget="add-project-modal">
+                            <span aria-hidden="true">+</span> Tambah Proyek
+                        </button>
                     {% endif %}
                 </div>
 
-                <form method="get"
-                      action="{% url 'main:show_projects' %}"
-                      class="project-search">
-                      {% csrf_token %}
+                <!-- SEARCH FORM WITH DEBOUNCING -->
+                <form id="project-search-form" class="project-search">
                     <input type="search"
+                           id="search-input"
                            name="title"
                            value="{{ title_query }}"
                            placeholder="Cari berdasarkan nama proyek"
@@ -37,53 +72,175 @@
                     <button type="submit" class="button btn-primary">Cari</button>
                 </form>
 
-                <div class="project-deck-container experience-grid project-grid">
-                    {% for project in project_list %}
-                        <article class="project-card-3d experience-card">
-                            {% if project.project_image_url %}
-                                <img src="{{ project.project_image_url }}"
-                                    alt="Gambar {{ project.title }}"
-                                    class="project-image"
-                                    style="margin-bottom: 1rem;">
-                            {% endif %}
-                            
-                            <span class="tech-tag experience-category">{{ project.tech_stack }}</span>
-                            <h2>{{ project.title }}</h2>
-                            <p class="experience-description">{{ project.description }}</p>
-                            
-                            <div class="project-card-actions">
-                                <div class="project-actions">
-                                    {% if project.project_url %}
-                                        <a href="{{ project.project_url }}" target="_blank" class="btn-secondary button" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
-                                            View Project ↗
-                                        </a>
-                                    {% endif %}
-                                    
-                                    <!-- TOMBOL STAR DIPASANG DI SINI -->
-                                    {% include "components/project_star.html" with project=project %}
-                                    
-                                    {% if user.is_superuser or is_editor %}
-                                        <a href="{% url 'main:edit_project' project.id %}"
-                                        class="btn-secondary button"
-                                        style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">Edit</a>
-                                    {% endif %}
+                <!-- Loading State -->
+                <div id="loading" class="empty-state hide">
+                    <p>Memuat projects...</p>
+                </div>
 
-                                    <!-- HANYA TAMPILKAN MODAL/TOMBOL HAPUS JIKA USER ADALAH SUPERUSER -->
-                                    {% if user.is_superuser %}
-                                        {% include "components/project_delete_modal.html" with project=project %}
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </article>
-                    {% empty %}
-                        {% if title_query %}
-                            <p class="empty-state">Tidak ada proyek dengan nama tersebut.</p>
-                        {% else %}
-                            <p class="empty-state">Belum ada proyek yang ditambahkan.</p>
-                        {% endif %}
-                    {% endfor %}
+                <!-- Error State -->
+                <div id="error" class="empty-state hide">
+                    <p>Gagal memuat data projects. Silakan coba lagi.</p>
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty" class="empty-state hide">
+                    <p>Belum ada proyek yang ditambahkan atau ditemukan.</p>
+                </div>
+
+                <!-- Project Grid Container -->
+                <div id="grid" class="project-deck-container experience-grid project-grid hide">
+                    <!-- Kartu proyek akan otomatis diisi oleh JavaScript -->
                 </div>
             </div>
         </section>
     </main>
+
+    {% if user.is_superuser %}
+    {% include "components/project_form_modal.html" %}
+    {% endif %}
+
+    <!-- JAVASCRIPT LOGIC -->
+<script>
+    const searchForm = document.getElementById("project-search-form");
+    const searchInput = document.getElementById("search-input");
+    const loadingState = document.getElementById("loading");
+    const errorState = document.getElementById("error");
+    const emptyState = document.getElementById("empty");
+    const gridContainer = document.getElementById("grid");
+    const modal = document.getElementById("add-project-modal");
+    const addProjectForm = document.getElementById("project-form");
+    let debounceTimer;
+
+    function getCookie(name) {
+        const m = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return m ? decodeURIComponent(m[2]) : null;
+    }
+
+    function sanitize(str) {
+        if (!str) return '';
+        const t = document.createElement('div');
+        t.textContent = str;
+        return t.innerHTML;
+    }
+
+    function safeUrl(url) {
+        return /^https?:\/\//i.test(url) ? sanitize(url) : '';
+    }
+
+    function notify(title, msg, type) {
+        if (typeof showToast === 'function') showToast(title, msg, type);
+        else alert(msg);
+    }
+
+    function closeModal() {
+        if (modal && modal.matches(':popover-open')) modal.hidePopover();
+        if (addProjectForm) addProjectForm.reset();
+    }
+
+    // Submit tambah proyek via AJAX
+    if (addProjectForm) {
+        addProjectForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const btn = addProjectForm.querySelector('button[type="submit"]');
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch("{% url 'main:create_project_ajax' %}", {
+                    method: "POST",
+                    headers: { "X-CSRFToken": getCookie("csrftoken") },
+                    body: new FormData(addProjectForm),
+                });
+                if (res.ok) {
+                    closeModal();
+                    refreshProjects(searchInput.value.trim());
+                    notify('Berhasil', 'Proyek baru berhasil ditambahkan!', 'success');
+                } else {
+                    const r = await res.json().catch(() => ({}));
+                    notify('Gagal', r.message || 'Data belum valid, cek lagi ya.', 'error');
+                }
+            } catch (err) {
+                notify('Gagal', 'Terjadi kesalahan jaringan.', 'error');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        });
+    }
+
+    function showState(el) {
+        [loadingState, errorState, emptyState, gridContainer].forEach(x => x && x.classList.add("hide"));
+        if (el) el.classList.remove("hide");
+    }
+
+    async function getProjects(query = "") {
+        const res = await fetch(`{% url 'main:get_projects_json' %}?q=${encodeURIComponent(query)}`);
+        if (!res.ok) throw new Error("Gagal mengambil data");
+        return await res.json();
+    }
+
+    async function refreshProjects(query = "") {
+        showState(loadingState);
+        try {
+            const projects = await getProjects(query);
+            if (!projects.length) { showState(emptyState); return; }
+
+            gridContainer.innerHTML = projects.map((p) => {
+                const url = safeUrl(p.project_url);
+                return `
+                <article class="project-card-3d experience-card">
+                    ${p.image_url ? `<img src="${sanitize(p.image_url)}" alt="" class="project-image" style="margin-bottom:1rem;width:100%;border-radius:8px;">` : ''}
+                    <span class="tech-tag experience-category">${sanitize(p.category)}</span>
+                    <h2>${sanitize(p.title)}</h2>
+                    <p class="experience-description">${sanitize(p.description)}</p>
+                                        <div class="project-actions">
+                        ${url ? `<a href="${url}" target="_blank" rel="noopener" class="pa-btn pa-btn--primary">View Project ↗</a>` : ''}
+                        <button type="button" onclick="toggleStar(${p.id})" class="pa-btn pa-btn--star ${p.is_starred ? 'is-starred' : ''}">
+                            ${p.is_starred ? '⭐' : '☆'} <span id="star-count-${p.id}">${p.stars_count}</span>
+                        </button>
+                        ${p.can_edit ? `<a href="/projects/edit/${p.id}/" class="pa-btn pa-btn--edit">Edit</a>` : ''}
+                        ${p.can_delete ? `<button type="button" onclick="deleteProject(${p.id})" class="pa-btn pa-btn--danger">Hapus</button>` : ''}
+                    </div>
+                </article>`;
+            }).join("");
+
+            showState(gridContainer);
+        } catch (err) {
+            console.error(err);
+            showState(errorState);
+        }
+    }
+
+    async function toggleStar(id) {
+        const res = await fetch(`/projects/${id}/star/`, {
+            method: "POST",
+            headers: { "X-CSRFToken": getCookie("csrftoken"), "X-Requested-With": "XMLHttpRequest" },
+        });
+        if (res.redirected && res.url.includes("/login")) { window.location.href = res.url; return; }
+        if (res.ok) refreshProjects(searchInput.value.trim());
+    }
+
+    async function deleteProject(id) {
+        if (!confirm("Yakin mau menghapus proyek ini?")) return;
+        const res = await fetch(`/projects/delete/${id}/`, {
+            method: "POST",
+            headers: { "X-CSRFToken": getCookie("csrftoken") },
+        });
+        if (res.ok) {
+            notify('Berhasil', 'Proyek dihapus.', 'success');
+            refreshProjects(searchInput.value.trim());
+        } else {
+            notify('Gagal', 'Kamu nggak punya akses untuk menghapus.', 'error');
+        }
+    }
+
+    searchForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        refreshProjects(searchInput.value.trim());
+    });
+
+    searchInput.addEventListener("input", (e) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => refreshProjects(e.target.value.trim()), 300);
+    });
+
+    refreshProjects(searchInput.value.trim());
+</script>
 {% endblock content %}
