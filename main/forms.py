@@ -1,4 +1,6 @@
-from django.forms import ModelForm, TextInput, Textarea, URLInput
+from django import forms
+from django.forms import ModelForm, Select, TextInput, Textarea, URLInput
+from django.utils.html import strip_tags
 
 from main.models import Project
 from main.models import Experience
@@ -56,3 +58,15 @@ class ExperienceForm(ModelForm):
     class Meta:
         model = Experience
         fields = ["title", "description", "category", "thumbnail"]
+
+    def clean_text(self, field_name):
+        value = strip_tags(self.cleaned_data.get(field_name, "")).strip()
+        if not value: 
+            raise forms.ValidationError("Isi tidak boleh kosong atau hanya berisi tag HTML.")
+        return value
+
+    def clean_title(self):
+        return self.clean_text("title")
+
+    def clean_description(self):
+        return self.clean_text("description")
