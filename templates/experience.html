@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <!-- HERO SECTION -->
@@ -42,52 +43,59 @@
     </div>
 </section>
 
-<!-- EXPERIENCE SECTION -->
+<!-- EXPERIENCE SECTION: data dimuat lewat AJAX (static/js/experience.js) -->
 <main style="padding-bottom: 4rem;">
     <section class="experience-section" id="experience-list">
-        <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div class="container"
+             id="experience-app"
+             data-list-url="{% url 'main:get_experience_json' %}"
+             data-add-url="{% url 'main:create_experience_ajax' %}">
+            <div class="exp-header">
                 <div>
                     <p class="section-kicker" style="margin: 0;">Perjalanan saya sejauh ini</p>
                     <h1 style="font-size: 2.5rem; font-weight: 800; margin: 0;">Experience</h1>
                 </div>
-                <!-- Tombol Tambah Pengalaman -->
-                <a href="{% url 'main:create_experience' %}" style="background: #000000; color: #ffffff; border: 2px solid #000000; padding: 0.6rem 1.2rem; border-radius: 10px; font-weight: 700; text-decoration: none; box-shadow: 3px 3px 0px #ff6b35;">
-                    + Tambah Experience
-                </a>
+                {% if can_add %}
+                <button type="button" id="experience-open-modal" class="exp-add-button">+ Tambah Experience</button>
+                {% endif %}
             </div>
 
-            <div class="experience-grid">
-                {% for exp in experience_list %}
-                    <article class="experience-card" style="background: #ffffff; border: 3px solid #000000; border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 5px 5px 0px #000000;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                            <span class="experience-category" style="background: #ffe3d8; color: #ff6b35; border: 1.5px solid #000; padding: 0.2rem 0.6rem; border-radius: 10px; font-size: 0.75rem; font-weight: 700;">
-                                {{ exp.category }}
-                            </span>
-                        </div>
-                        <h2 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 0.5rem;">{{ exp.title }}</h2>
-                        <p style="font-size: 0.95rem; color: #333; line-height: 1.5; margin-bottom: 1rem;">{{ exp.description }}</p>
+            <!-- Pencarian (debounced) -->
+            <form id="experience-search-form" class="project-search" role="search">
+                <input type="search"
+                       id="experience-search-input"
+                       placeholder="Cari berdasarkan judul atau kategori"
+                       class="project-search__input"
+                       aria-label="Cari pengalaman"
+                       autocomplete="off">
+                <button type="submit" class="button btn-primary">Cari</button>
+            </form>
 
-                        <!-- Tombol Action: Edit & Delete -->
-                        <div style="display: flex; gap: 0.5rem; border-top: 2px dashed #000; padding-top: 0.75rem;">
-                            <a href="{% url 'main:edit_experience' exp.id %}" style="background: #fde047; color: #000; border: 1.5px solid #000; padding: 0.25rem 0.75rem; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
-                                Edit
-                            </a>
-                            <form action="{% url 'main:delete_experience' exp.id %}" method="POST" style="margin: 0;">
-                                {% csrf_token %}
-                                <button type="submit" onclick="return confirm('Yakin ingin menghapus data ini?')" style="background: #ef4444; color: #fff; border: 1.5px solid #000; padding: 0.25rem 0.75rem; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer;">
-                                    Delete
-                                </button>
-                            </form>
-                        </div>
-                    </article>
-                {% empty %}
-                    <div class="experience-card" style="text-align: center; padding: 2rem; background: #ffffff; border: 3px solid #000000; border-radius: 16px; box-shadow: 5px 5px 0px #000000;">
-                        <p style="font-weight: 700; margin: 0;">Belum ada pengalaman yang ditambahkan.</p>
-                    </div>
-                {% endfor %}
+            <!-- Loading state -->
+            <div id="experience-loading" class="empty-state hide" role="status">
+                <p>Memuat pengalaman...</p>
             </div>
+
+            <!-- Error state -->
+            <div id="experience-error" class="empty-state hide" role="alert">
+                <p>Gagal memuat data pengalaman. Silakan coba lagi.</p>
+                <button type="button" id="experience-retry" class="button">Coba lagi</button>
+            </div>
+
+            <!-- Empty state -->
+            <div id="experience-empty" class="empty-state hide">
+                <p id="experience-empty-message">Belum ada pengalaman yang ditambahkan.</p>
+            </div>
+
+            <!-- Kartu diisi oleh JavaScript -->
+            <div id="experience-grid" class="experience-grid hide"></div>
         </div>
     </section>
 </main>
+
+{% if can_add %}
+    {% include "components/experience_form_modal.html" %}
+{% endif %}
+
+<script src="{% static 'js/experience.js' %}" defer></script>
 {% endblock %}
