@@ -38,10 +38,11 @@ def show_main(request):
 # --- EXPERIENCE VIEWS ---
 
 def can_manage_experience(user):
-    """Peran yang boleh menambah/mengubah Experience: superuser atau grup Editor."""
+    """Peran yang boleh menambah/mengubah Experience (Tugas 4): superuser atau grup Editor."""
     return user.is_authenticated and (user.is_superuser or is_editor(user))
 
-@ensure_csrf_cookie 
+
+@ensure_csrf_cookie  # pastikan cookie csrftoken ada agar fetch POST (star/hapus) bisa memakai X-CSRFToken
 def show_experience(request):
     """Hanya merender kerangka halaman; data dimuat lewat AJAX dari get_experience_json."""
     can_add = can_manage_experience(request.user)
@@ -308,7 +309,9 @@ def create_project_ajax(request):
 
     return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
 
+
 # --- EXPERIENCE AJAX ---
+
 @require_GET
 def get_experience_json(request):
     """Daftar Experience sebagai JSON (boleh dibaca pengunjung yang belum login).

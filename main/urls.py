@@ -21,7 +21,8 @@ from main.views import (
     show_json_by_id,
     add_project_ajax,
     create_project_ajax,
-    get_experience_ajax,
+    get_experience_json,
+    create_experience_ajax,
     toggle_star_experience,
     delete_experience_ajax,
 )
@@ -37,6 +38,10 @@ urlpatterns = [
     path("experience/edit/<uuid:id>/", edit_experience, name="edit_experience"),
     path("experience/delete/<uuid:id>/", delete_experience, name="delete_experience"),
     path("experience/json/", show_json_experience, name="show_json_experience"),
+    path("api/experience/", get_experience_json, name="get_experience_json"),
+    path("experience/add-ajax/", create_experience_ajax, name="create_experience_ajax"),
+    path("experience/<uuid:id>/star/", toggle_star_experience, name="toggle_star_experience"),
+    path("experience/<uuid:id>/delete-ajax/", delete_experience_ajax, name="delete_experience_ajax"),
 
     # --- PROJECT URLS ---
     path("projects/", show_projects, name="show_projects"),
