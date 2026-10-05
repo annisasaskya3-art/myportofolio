@@ -99,3 +99,49 @@ Dalam pengerjaan Assignment 4 ini, saya menggunakan bantuan AI (Gemini dan Claud
 *Penyesuaian Manual yang Dilakukan:*
 * Menyelaraskan nama endpoint URL dengan struktur urls.py yang sudah ada pada Tugas 3.
 * Mempelajari output kode yang dikeluarkan oleh Gemini dan mempelajari mengapa kode tersebut bisa tersusun seperti itu.
+
+### Tugas 5
+
+1. Jelaskan apa itu debouncing dan mengapa teknik ini penting diterapkan pada fitur pencarian yang menggunakan AJAX!
+
+   Debouncing adalah teknik menunda eksekusi sebuah fungsi sampai pemicunya berhenti terjadi selama jeda waktu tertentu atau syarat tertentu. Setiap ada pemicu baru, timer lama dibatalkan (`clearTimeout`) dan timer baru dimulai (direset kembali ke perhitungan timer awal). Pada pencarian di halaman Experience, fungsi `loadExperiences()` baru dipanggil 400 ms setelah pengguna berhenti mengetik. Tanpa debouncing, mengetik "research" akan mengirim 8 permintaan, satu per huruf. Ini penting karena:
+   - **Mengurangi beban server dan database.** Setiap permintaan menjalankan query `LIKE` dan membuat respons JSON. Debouncing mengurangi permintaan yang tidak berguna.
+   - **Menghindari respons yang datang tidak berurutan.** Respons untuk "res" bisa tiba setelah respons untuk "research" dan menimpanya dengan hasil yang salah. Selain debouncing, aku menambahkan penanda `latestRequestId` supaya respons lama diabaikan.
+   - **UI lebih mulus.** Daftar dan state loading tidak berkedip setiap ketukan tombol, sehingga pengalaman pengguna lebih nyaman dan hemat bandwidth.
+
+2. Jelaskan fungsi dari penggunaan `await` ketika kita menggunakan `fetch()`! Apa yang akan terjadi jika kita tidak menggunakan `await`?
+
+   `fetch()` bersifat asinkron dan langsung mengembalikan sebuah `Promise` tanpa menunggu respons jaringan selesai. `await` menjeda eksekusi fungsi `async` sampai Promise itu selesai, lalu memberikan nilai hasilnya, yaitu objek `Response`. Eksekusi yang dijeda hanya fungsi tersebut, sedangkan halaman tetap responsif. Karena itu `await` juga dipakai untuk `response.json()`, yang juga mengembalikan Promise.
+
+   Tanpa `await`, variabel yang kita terima hanyalah objek `Promise`, bukan datanya. Akibatnya:
+   - `response.ok` atau `response.json()` dipanggil pada Promise, bukan pada `Response`, sehingga muncul `undefined` atau error (misalnya `data.results.map is not a function`).
+   - Kode setelahnya berjalan lebih dulu, sehingga state loading langsung hilang atau daftar dirender dari data kosong sebelum respons tiba.
+   - Error jaringan tidak tertangkap oleh `try/catch` karena penolakan Promise terjadi di luar blok tersebut. Hasilnya `unhandled promise rejection`, dan state error tidak pernah muncul.
+
+3. Jelaskan apa itu serangan XSS (Cross-Site Scripting) dan mengapa data yang ditampilkan melalui AJAX/JavaScript lebih rentan terhadap serangan ini daripada data yang ditampilkan langsung melalui template Django!
+
+   XSS adalah serangan ketika penyerang berhasil menyisipkan kode JavaScript ke halaman yang kemudian dijalankan di browser korban. Contohnya, data berisi `<img src="x" onerror="alert('XSS!')">` yang disimpan ke database. Skrip itu berjalan dengan hak akses halaman kita, sehingga bisa mencuri cookie sesi, memalsukan aksi pengguna, atau mengalihkan halaman.
+
+   Data lewat AJAX lebih rentan karena **perlindungan otomatis Django tidak berlaku di sana**:
+   - Template Django melakukan *autoescape*. `{{ exp.title }}` mengubah `<` menjadi `&lt;`, sehingga tag tampil sebagai teks biasa.
+   - Pada AJAX, server hanya mengirim JSON mentah. JSON bukan HTML, jadi tidak ada escaping HTML otomatis. Kita yang merakit HTML di JavaScript. Jika nilai dimasukkan ke `innerHTML` lewat template literal tanpa escape, browser menguraikannya sebagai markup dan `onerror` ikut berjalan.
+   - Kerentanan ini mudah terlewat karena kodenya terlihat wajar (`` `<h2>${exp.title}</h2>` ``) dan semua nilai harus di-escape secara manual satu per satu.
+
+   Karena itu aku memakai pertahanan berlapis. Di klien, semua teks melewati `escapeHtml()` dan URL difilter `safeUrl()` (hanya http/https). Di server, `strip_tags` membersihkan input di `clean_title` dan `clean_description`, sehingga input berisi tag ditolak atau dibersihkan sebelum disimpan.
+
+
+### AI Disclosure (Individual Assignment 5)
+
+- **Tools yang digunakan:** Claude (Claude Code) dan Gemini AI.
+- **Bagian yang dibantu AI:**
+  - Endpoint JSON, view POST dengan status 201/400/403, endpoint star, dan endpoint hapus untuk Experience.
+  - `static/js/experience.js` (AJAX, debouncing, modal, toast) dan `static/js/utils.js` (`getCookie`, `escapeHtml`, `safeUrl`).
+  - `clean_title` dan `clean_description` dengan `strip_tags`, migrasi `0005`, serta unit test.
+  - Draf jawaban pertanyaan reflektif di atas.
+- **Keterbatasan AI yang ditemukan:**
+  - Komponen `toast.html` lama tidak cocok dengan `toast.js`: id elemennya berbeda dan `toast.js` tidak pernah dimuat di `base.html`. Claude menyelaraskannya.
+  - Test lama `test_projects_content_display` dan `test_experience_content_display` mengecek HTML server-side, padahal halamannya sudah AJAX, jadi tes itu diubah.
+  - Claude tidak bisa menjalankan `runserver` di lingkungannya (tidak ada akses ke PyPI). JavaScript-nya diuji di Chromium dengan endpoint tiruan, tetapi Python/Django dan migrasi harus dijalankan dan diuji sendiri.
+- **Penyesuaian dan pengujian manual:** hasil kerja Claude dibaca, dijalankan, dan diuji di browser untuk peran superuser, Editor, user biasa, dan pengunjung, termasuk payload XSS `<img src="x" onerror="alert('XSS!')">` (daftar uji di bawah).
+
+**Checklist uji manual:** (1) pengunjung bisa melihat daftar, tidak ada tombol tambah; (2) pencarian hanya mengirim satu request setelah berhenti mengetik (tab Network); (3) superuser/Editor menambah data lewat modal dan daftar langsung ter-update; (4) user biasa yang mengirim POST langsung mendapat 403; (5) payload XSS ditolak (400) atau tampil sebagai teks, tanpa alert.
