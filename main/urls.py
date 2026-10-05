@@ -21,6 +21,9 @@ from main.views import (
     show_json_by_id,
     add_project_ajax,
     create_project_ajax,
+    get_experience_ajax,
+    toggle_star_experience,
+    delete_experience_ajax,
 )
 
 app_name = "main"

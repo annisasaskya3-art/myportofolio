@@ -10,7 +10,10 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.decorators import login_required 
 from django.core.exceptions import PermissionDenied 
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseBadRequest
-from django.views.decorators.http import require_POST
+from django.db.models import Q
+from django.urls import reverse
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.http import require_GET, require_POST
 
 from main.models import Experience, Project
 from main.forms import ProjectForm, ExperienceForm
@@ -34,11 +37,18 @@ def show_main(request):
 
 # --- EXPERIENCE VIEWS ---
 
+def can_manage_experience(user):
+    """Peran yang boleh menambah/mengubah Experience: superuser atau grup Editor."""
+    return user.is_authenticated and (user.is_superuser or is_editor(user))
+
+@ensure_csrf_cookie 
 def show_experience(request):
+    """Hanya merender kerangka halaman; data dimuat lewat AJAX dari get_experience_json."""
+    can_add = can_manage_experience(request.user)
     context = {
         "name": "Annisa Saskya Aulia",
-        "experience_list": Experience.objects.order_by("-started_at"),
-        "can_edit": request.user.is_superuser or is_editor(request.user),
+        "can_add": can_add,
+        "form": ExperienceForm() if can_add else None,
     }
     return render(request, "experience.html", context)
 
@@ -297,3 +307,103 @@ def create_project_ajax(request):
         )
 
     return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
+# --- EXPERIENCE AJAX ---
+@require_GET
+def get_experience_json(request):
+    """Daftar Experience sebagai JSON (boleh dibaca pengunjung yang belum login).
+
+    Query string `q` mencari berdasarkan judul atau kategori.
+    Respons disusun manual, termasuk jumlah star dan status star user yang sedang login.
+    """
+    query = request.GET.get("q", "").strip()
+    experiences = Experience.objects.prefetch_related("stars").order_by("-started_at")
+    if query:
+        experiences = experiences.filter(
+            Q(title__icontains=query) | Q(category__icontains=query)
+        )
+
+    user = request.user
+    can_edit = can_manage_experience(user)
+    can_delete = user.is_authenticated and user.is_superuser
+
+    results = []
+    for exp in experiences:
+        star_user_ids = {u.pk for u in exp.stars.all()}  # memakai hasil prefetch, tanpa query tambahan
+        results.append({
+            "id": str(exp.id),
+            "title": exp.title,
+            "description": exp.description,
+            "category": exp.category,
+            "category_label": exp.get_category_display(),
+            "thumbnail": exp.thumbnail or "",
+            "started_at": exp.started_at.strftime("%d %b %Y"),
+            "is_ongoing": exp.is_ongoing,
+            "stars_count": len(star_user_ids),
+            "is_starred": user.is_authenticated and user.pk in star_user_ids,
+            "can_edit": can_edit,
+            "can_delete": can_delete,
+            "edit_url": reverse("main:edit_experience", args=[exp.id]),
+            "star_url": reverse("main:toggle_star_experience", args=[exp.id]),
+            "delete_url": reverse("main:delete_experience_ajax", args=[exp.id]),
+        })
+
+    return JsonResponse({"results": results, "count": len(results)})
+
+
+@require_POST
+def create_experience_ajax(request):
+    """Tambah Experience via AJAX. 201 = berhasil, 400 = validasi gagal, 403 = tidak berhak."""
+    # Pemeriksaan hak akses di server (bukan hanya menyembunyikan tombol di template)
+    if not can_manage_experience(request.user):
+        return JsonResponse(
+            {"message": "Anda tidak memiliki akses untuk menambah pengalaman."},
+            status=403,
+        )
+
+    form = ExperienceForm(request.POST)
+    if form.is_valid():
+        experience = form.save()
+        return JsonResponse(
+            {"message": "Pengalaman berhasil ditambahkan.", "id": str(experience.id)},
+            status=201,
+        )
+
+    return JsonResponse(
+        {"message": "Data tidak valid.", "errors": form.errors.get_json_data()},
+        status=400,
+    )
+
+
+@require_POST
+def toggle_star_experience(request, id):
+    """Beri/cabut star pada Experience. Hanya untuk user yang sudah login."""
+    if not request.user.is_authenticated:
+        return JsonResponse(
+            {"message": "Silakan login untuk memberi star.", "login_url": reverse("main:login")},
+            status=401,
+        )
+
+    experience = get_object_or_404(Experience, pk=id)
+    if experience.stars.filter(pk=request.user.pk).exists():
+        experience.stars.remove(request.user)
+        is_starred = False
+    else:
+        experience.stars.add(request.user)
+        is_starred = True
+
+    return JsonResponse({"is_starred": is_starred, "stars_count": experience.stars.count()})
+
+
+@require_POST
+def delete_experience_ajax(request, id):
+    """Hapus Experience via AJAX. Aturan Tugas 4: hanya superuser."""
+    if not (request.user.is_authenticated and request.user.is_superuser):
+        return JsonResponse(
+            {"message": "Hanya superuser yang dapat menghapus data."},
+            status=403,
+        )
+
+    experience = get_object_or_404(Experience, pk=id)
+    experience.delete()
+    return JsonResponse({"message": "Pengalaman berhasil dihapus."})
