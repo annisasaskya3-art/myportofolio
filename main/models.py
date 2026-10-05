@@ -20,17 +20,19 @@ class Experience(models.Model):
     started_at = models.DateTimeField(auto_now_add=True)
     ended_at = models.DateTimeField(blank=True, null=True)
 
-    star = models.ManyToManyField(
+    # Star dari Tugas 4: user yang memberi star pada pengalaman ini
+    stars = models.ManyToManyField(
         User,
         related_name="starred_experiences",
         blank=True,
     )
+
     def __str__(self):
         return self.title
 
     def total_stars(self):
-        return self.starts.count()
-    
+        return self.stars.count()
+
     @property
     def is_ongoing(self):
         return self.ended_at is None
