@@ -14,3 +14,6 @@ ENV/
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Django collected static files
+/staticfiles/

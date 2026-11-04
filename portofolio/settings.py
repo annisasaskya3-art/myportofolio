@@ -139,6 +139,9 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 WHITENOISE_USE_FINDERS = True
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+WHITENOISE_USE_FINDERS = True
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -147,7 +150,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'main',  # Halaman/aplikasi main milikmu
+    'main',  # Halaman/aplikasi main
+    "rest_framework",
 ]
 
 CSRF_TRUSTED_ORIGINS = ["https://annisa.saskya.pws.cs.ui.ac.id"]

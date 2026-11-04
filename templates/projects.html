@@ -100,6 +100,7 @@
     {% endif %}
 
     <!-- JAVASCRIPT LOGIC -->
+{% csrf_token %}
 <script>
     const searchForm = document.getElementById("project-search-form");
     const searchInput = document.getElementById("search-input");
@@ -144,9 +145,11 @@
             const btn = addProjectForm.querySelector('button[type="submit"]');
             if (btn) btn.disabled = true;
             try {
-                const res = await fetch("{% url 'main:create_project_ajax' %}", {
+                const res = await fetch("/api/v1/projects/", {
                     method: "POST",
-                    headers: { "X-CSRFToken": getCookie("csrftoken") },
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken"),
+                    },
                     body: new FormData(addProjectForm),
                 });
                 if (res.ok) {
@@ -155,7 +158,15 @@
                     notify('Berhasil', 'Proyek baru berhasil ditambahkan!', 'success');
                 } else {
                     const r = await res.json().catch(() => ({}));
-                    notify('Gagal', r.message || 'Data belum valid, cek lagi ya.', 'error');
+                    const message = Object.entries(r)
+                        .map(([field, errors]) => `${field}: ${errors}`)
+                        .join("\n");
+
+                    notify(
+                        "Gagal",
+                        message || "Data belum valid, cek lagi ya.",
+                        "error"
+                    );
                 }
             } catch (err) {
                 notify('Gagal', 'Terjadi kesalahan jaringan.', 'error');
@@ -171,8 +182,14 @@
     }
 
     async function getProjects(query = "") {
-        const res = await fetch(`{% url 'main:get_projects_json' %}?q=${encodeURIComponent(query)}`);
-        if (!res.ok) throw new Error("Gagal mengambil data");
+        const res = await fetch(
+            `/api/v1/projects/?title=${encodeURIComponent(query)}`
+        );
+
+        if (!res.ok) {
+            throw new Error("Gagal mengambil data");
+        }
+
         return await res.json();
     }
 
@@ -186,14 +203,14 @@
                 const url = safeUrl(p.project_url);
                 return `
                 <article class="project-card-3d experience-card">
-                    ${p.image_url ? `<img src="${sanitize(p.image_url)}" alt="" class="project-image" style="margin-bottom:1rem;width:100%;border-radius:8px;">` : ''}
-                    <span class="tech-tag experience-category">${sanitize(p.category)}</span>
+                    ${p.project_image_url ? `<img src="${sanitize(p.project_image_url)}" alt="" class="project-image" style="margin-bottom:1rem;width:100%;border-radius:8px;">` : ''}
+                    <span class="tech-tag experience-tech_stack">${sanitize(p.tech_stack)}</span>
                     <h2>${sanitize(p.title)}</h2>
                     <p class="experience-description">${sanitize(p.description)}</p>
                                         <div class="project-actions">
                         ${url ? `<a href="${url}" target="_blank" rel="noopener" class="pa-btn pa-btn--primary">View Project ↗</a>` : ''}
                         <button type="button" onclick="toggleStar(${p.id})" class="pa-btn pa-btn--star ${p.is_starred ? 'is-starred' : ''}">
-                            ${p.is_starred ? '⭐' : '☆'} <span id="star-count-${p.id}">${p.stars_count}</span>
+                            ${p.is_starred ? '⭐' : '☆'} <span id="star-count-${p.id}">${p.star_count}</span>
                         </button>
                         ${p.can_edit ? `<a href="/projects/edit/${p.id}/" class="pa-btn pa-btn--edit">Edit</a>` : ''}
                         ${p.can_delete ? `<button type="button" onclick="deleteProject(${p.id})" class="pa-btn pa-btn--danger">Hapus</button>` : ''}
@@ -208,28 +225,47 @@
         }
     }
 
-    async function toggleStar(id) {
-        const res = await fetch(`/projects/${id}/star/`, {
-            method: "POST",
-            headers: { "X-CSRFToken": getCookie("csrftoken"), "X-Requested-With": "XMLHttpRequest" },
-        });
-        if (res.redirected && res.url.includes("/login")) { window.location.href = res.url; return; }
-        if (res.ok) refreshProjects(searchInput.value.trim());
+async function toggleStar(id) {
+    const res = await fetch(`/api/v1/projects/${id}/star/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "X-Requested-With": "XMLHttpRequest"
+        },
+    });
+
+    if (res.status === 403) {
+        notify("Gagal", "Kamu harus login untuk memberi star.", "error");
+        return;
     }
 
-    async function deleteProject(id) {
-        if (!confirm("Yakin mau menghapus proyek ini?")) return;
-        const res = await fetch(`/projects/delete/${id}/`, {
-            method: "POST",
-            headers: { "X-CSRFToken": getCookie("csrftoken") },
-        });
-        if (res.ok) {
-            notify('Berhasil', 'Proyek dihapus.', 'success');
-            refreshProjects(searchInput.value.trim());
-        } else {
-            notify('Gagal', 'Kamu nggak punya akses untuk menghapus.', 'error');
-        }
+    if (res.ok) {
+        refreshProjects(searchInput.value.trim());
     }
+}
+
+    async function deleteProject(id) {
+    if (!confirm("Yakin mau menghapus proyek ini?")) return;
+
+    const res = await fetch(`/api/v1/projects/${id}/`, {
+        method: "DELETE",
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+        },
+    });
+
+    if (res.status === 403) {
+        notify("Gagal", "Kamu tidak punya akses untuk menghapus proyek.", "error");
+        return;
+    }
+
+    if (res.ok) {
+        notify("Berhasil", "Proyek dihapus.", "success");
+        refreshProjects(searchInput.value.trim());
+    } else {
+        notify("Gagal", "Proyek gagal dihapus.", "error");
+    }
+}
 
     searchForm.addEventListener("submit", (e) => {
         e.preventDefault();

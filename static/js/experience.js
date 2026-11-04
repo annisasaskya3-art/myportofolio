@@ -1,7 +1,7 @@
 /**
  * Halaman Experience (Tugas 5): AJAX + debounced search + modal tambah + toast + anti-XSS.
  *
- * Dibagi menjadi bagian kecil agar mudah dibaca:
+ * Dibagi menjadi bagian kecil:
  *   1. Konfigurasi & referensi elemen
  *   2. State UI (loading / error / empty / grid)
  *   3. Pengambilan data (fetch) dan render kartu
@@ -74,14 +74,14 @@
 
     // Setiap nilai teks dari server di-escape sebelum masuk ke innerHTML.
     return `
-      <article class="exp-card" data-id="${escapeHtml(exp.id)}">
+      <article class="project-card-3d experience-card exp-card" data-id="${escapeHtml(exp.id)}">
         ${thumbHtml}
         <div class="exp-card__meta">
-          <span class="exp-card__tag">${escapeHtml(exp.category_label)}</span>
+          <span class="tech-tag experience-category">${escapeHtml(exp.category_label)}</span>
           <span class="exp-card__date">${escapeHtml(exp.started_at)}${exp.is_ongoing ? ' – sekarang' : ''}</span>
         </div>
-        <h2 class="exp-card__title">${escapeHtml(exp.title)}</h2>
-        <p class="exp-card__desc">${escapeHtml(exp.description)}</p>
+        <h2>${escapeHtml(exp.title)}</h2>
+        <p class="experience-description exp-card__desc">${escapeHtml(exp.description)}</p>
         <div class="project-actions">
           <button type="button" class="pa-btn pa-btn--star ${exp.is_starred ? 'is-starred' : ''}"
                   data-action="star" data-url="${escapeHtml(exp.star_url)}"
