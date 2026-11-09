@@ -49,7 +49,6 @@
         <div class="container"
             id="experience-app"
             data-list-url="{% url 'api:experience-list' %}"
-            data-add-url="{% url 'main:create_experience_ajax' %}"
             data-login-url="{% url 'main:login' %}"
             data-authenticated="{{ user.is_authenticated|yesno:'true,false' }}">
             <div class="exp-header">
@@ -95,7 +94,7 @@
     </section>
 </main>
 
-{% if can_add %}
+{% if can_edit %}
     {% include "components/experience_form_modal.html" %}
 {% endif %}
 
