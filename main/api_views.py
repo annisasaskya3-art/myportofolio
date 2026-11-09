@@ -13,7 +13,7 @@ from main.permissions import (
     IsPortfolioOwnerOrEditorOrReadOnly,
 )
 from main.serializers import ExperienceSerializer, ProjectSerializer
-
+from django.db.models import Q
 
 @api_view(["GET", "HEAD", "POST"])
 @authentication_classes([SessionAuthentication])
@@ -78,7 +78,10 @@ def project_star(request, project_id):
 @permission_classes([IsPortfolioOwnerOrEditorOrReadOnly])
 def experience_list(request):
     if request.method in ("GET", "HEAD"):
-        experiences = Experience.objects.prefetch_related("stars").all()
+        experiences = Experience.objects.prefetch_related("stars").order_by("-started_at")
+        query = request.query_params.get("q", "").strip()
+        if query:
+            experiences = experiences.filter(Q(title_icontains=query) | Q(category__icontains=query))
         serializer = ExperienceSerializer(
             experiences,
             many=True,
