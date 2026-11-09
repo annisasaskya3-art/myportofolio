@@ -47,9 +47,11 @@
 <main style="padding-bottom: 4rem;">
     <section class="experience-section" id="experience-list">
         <div class="container"
-             id="experience-app"
-             data-list-url="{% url 'main:get_experience_json' %}"
-             data-add-url="{% url 'main:create_experience_ajax' %}">
+            id="experience-app"
+            data-list-url="{% url 'api:experience-list' %}"
+            data-add-url="{% url 'main:create_experience_ajax' %}"
+            data-login-url="{% url 'main:login' %}"
+            data-authenticated="{{ user.is_authenticated|yesno:'true,false' }}">
             <div class="exp-header">
                 <div>
                     <p class="section-kicker" style="margin: 0;">Perjalanan saya sejauh ini</p>

@@ -1,15 +1,6 @@
 /**
  * Halaman Experience (Tugas 5): AJAX + debounced search + modal tambah + toast + anti-XSS.
  *
- * Dibagi menjadi bagian kecil:
- *   1. Konfigurasi & referensi elemen
- *   2. State UI (loading / error / empty / grid)
- *   3. Pengambilan data (fetch) dan render kartu
- *   4. Aksi kartu: star & hapus
- *   5. Modal tambah data
- *   6. Pencarian dengan debouncing
- *
- * Bergantung pada utils.js (getCookie, escapeHtml, safeUrl) dan toast.js (showToast).
  */
 (function () {
   'use strict';
@@ -22,7 +13,11 @@
   const urls = {
     list: root.dataset.listUrl,
     add: root.dataset.addUrl,
+    login: root.dataset.loginUrl,
   };
+  const isAuthenticated = root.dataset.authenticated === 'true';
+  const detailUrl = (id) => `${urls.list}${encodeURIComponent(id)}/`;
+  const starUrl = (id) => `${detailUrl(id)}star/`;
 
   const searchForm = document.getElementById('experience-search-form');
   const searchInput = document.getElementById('experience-search-input');
@@ -51,12 +46,40 @@
   }
 
   // ---------- 3. Ambil data & render ----------
+  // Satu helper untuk semua panggilan ke API (GET/POST/PUT/DELETE).
+  async function apiRequest(url, { method = 'GET', body } = {}) {
+    const options = { method, credentials: 'same-origin', headers: { Accept: 'application/json' } };
+    if (method !== 'GET') options.headers['X-CSRFToken'] = getCookie('csrftoken');
+    if (body !== undefined) {
+      options.headers['Content-Type'] = 'application/json';
+      options.body = JSON.stringify(body);
+    }
+    const response = await fetch(url, options);
+    let data = null;
+    if (response.status !== 204) {
+      try { data = await response.json(); } catch (e) { /* bukan JSON */ }
+    }
+    return { response, data };
+  }
+
+  // Error DRF: 400 -> {field: ["pesan"]}, 403 -> {"detail": "pesan"}
+  function describeApiError(data, fallback) {
+    if (!data) return fallback;
+    if (typeof data.detail === 'string') return data.detail;
+    const lines = Object.entries(data).map(([f, msgs]) => `${f}: ${[].concat(msgs).join(' ')}`);
+    return lines.join('\n') || fallback;
+  }
+
+  function formatDate(iso) {
+    return new Date(iso).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
   async function fetchExperiences(query) {
-    const response = await fetch(`${urls.list}?q=${encodeURIComponent(query)}`, {
-      headers: { 'X-Requested-With': 'XMLHttpRequest' },
-    });
+    const params = new URLSearchParams();
+    if (query) params.set('q', query);
+    const { response, data } = await apiRequest(`${urls.list}?${params}`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.json();
+    return data; // API mengembalikan array langsung
   }
 
   function renderCard(exp) {
@@ -64,12 +87,10 @@
     const thumbHtml = thumb
       ? `<img src="${escapeHtml(thumb)}" alt="" class="exp-card__thumb" loading="lazy">`
       : '';
-    const editBtn = exp.can_edit
-      ? `<a href="${escapeHtml(exp.edit_url)}" class="pa-btn pa-btn--edit">Edit</a>`
-      : '';
+    const editBtn = ''; // dipasang lagi di Commit 8 (modal edit)
     const deleteBtn = exp.can_delete
       ? `<button type="button" class="pa-btn pa-btn--danger" data-action="delete"
-                 data-url="${escapeHtml(exp.delete_url)}">Hapus</button>`
+                 data-id="${escapeHtml(exp.id)}">Hapus</button>`
       : '';
 
     // Setiap nilai teks dari server di-escape sebelum masuk ke innerHTML.
@@ -78,15 +99,15 @@
         ${thumbHtml}
         <div class="exp-card__meta">
           <span class="tech-tag experience-category">${escapeHtml(exp.category_label)}</span>
-          <span class="exp-card__date">${escapeHtml(exp.started_at)}${exp.is_ongoing ? ' – sekarang' : ''}</span>
+          <span class="exp-card__date">${escapeHtml(formatDate(exp.started_at))}${exp.is_ongoing ? ' – sekarang' : ''}</span>
         </div>
         <h2>${escapeHtml(exp.title)}</h2>
         <p class="experience-description exp-card__desc">${escapeHtml(exp.description)}</p>
         <div class="project-actions">
           <button type="button" class="pa-btn pa-btn--star ${exp.is_starred ? 'is-starred' : ''}"
-                  data-action="star" data-url="${escapeHtml(exp.star_url)}"
+                  data-action="star" data-id="${escapeHtml(exp.id)}"
                   aria-pressed="${exp.is_starred ? 'true' : 'false'}">
-            ${exp.is_starred ? '⭐' : '☆'} <span class="star-count">${escapeHtml(exp.stars_count)}</span>
+            ${exp.is_starred ? '⭐' : '☆'} <span class="star-count">${escapeHtml(exp.star_count)}</span>
           </button>
           ${editBtn}
           ${deleteBtn}
@@ -99,17 +120,16 @@
     showState('loading');
     try {
       const data = await fetchExperiences(query);
-      if (requestId !== latestRequestId) return; // sudah ada permintaan yang lebih baru
+      if (requestId !== latestRequestId) return;
 
-      if (!data.results.length) {
+      if (!data.length) {
         emptyMessage.textContent = query
           ? `Tidak ada pengalaman yang cocok dengan "${query}".`
           : 'Belum ada pengalaman yang ditambahkan.';
         showState('empty');
         return;
       }
-      states.grid.innerHTML = data.results.map(renderCard).join('');
-      showState('grid');
+       states.grid.innerHTML = data.map(renderCard).join('');
     } catch (err) {
       if (requestId !== latestRequestId) return;
       console.error('Gagal memuat experience:', err);
@@ -136,18 +156,21 @@
 
   // ---------- 4. Aksi kartu (event delegation) ----------
   async function handleStar(button) {
+    if (!isAuthenticated) {
+      showToast('Perlu login', 'Silakan login untuk memberi star.', 'error');
+      setTimeout(() => { window.location.href = urls.login; }, 1200);
+      return;
+    }
     button.disabled = true;
     try {
-      const { response, data } = await postRequest(button.dataset.url);
-      if (response.status === 401) {
-        showToast('Perlu login', data.message || 'Silakan login terlebih dahulu.', 'error');
-        if (data.login_url) setTimeout(() => { window.location.href = data.login_url; }, 1200);
+      const { response, data } = await apiRequest(starUrl(button.dataset.id), { method: 'POST' });
+      if (!response.ok) {
+        showToast('Gagal', describeApiError(data, `HTTP ${response.status}`), 'error');
         return;
       }
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       loadExperiences(currentQuery());
     } catch (err) {
-      showToast('Gagal', 'Star tidak dapat diubah. Coba lagi.', 'error');
+      showToast('Gagal', 'Terjadi kesalahan jaringan.', 'error');
     } finally {
       button.disabled = false;
     }
@@ -157,12 +180,13 @@
     if (!confirm('Yakin ingin menghapus pengalaman ini?')) return;
     button.disabled = true;
     try {
-      const { response, data } = await postRequest(button.dataset.url);
-      if (response.ok) {
-        showToast('Berhasil', data.message || 'Pengalaman dihapus.', 'success');
+      const { response, data } = await apiRequest(detailUrl(button.dataset.id), { method: 'DELETE' });
+      if (response.status === 204) {
+        showToast('Berhasil', 'Pengalaman dihapus.', 'success');
         loadExperiences(currentQuery());
       } else {
-        showToast('Gagal', data.message || 'Anda tidak memiliki akses.', 'error');
+        showToast(response.status === 403 ? 'Tidak diizinkan' : 'Gagal',
+                  describeApiError(data, `HTTP ${response.status}`), 'error');
       }
     } catch (err) {
       showToast('Gagal', 'Terjadi kesalahan jaringan.', 'error');
