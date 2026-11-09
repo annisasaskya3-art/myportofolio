@@ -4,7 +4,7 @@
         <button type="button" class="exp-modal__close" data-close-modal aria-label="Tutup form">×</button>
         <h2 id="experience-modal-title">Tambah Experience</h2>
 
-        <form id="experience-form" method="post" action="{% url 'main:create_experience_ajax' %}" novalidate>
+        <form id="experience-form" method="post" novalidate>
             {% csrf_token %}
             {% for field in form %}
                 <div class="form-group">

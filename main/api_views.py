@@ -81,7 +81,7 @@ def experience_list(request):
         experiences = Experience.objects.prefetch_related("stars").order_by("-started_at")
         query = request.query_params.get("q", "").strip()
         if query:
-            experiences = experiences.filter(Q(title_icontains=query) | Q(category__icontains=query))
+            experiences = experiences.filter(Q(title__icontains=query) | Q(category__icontains=query))
         serializer = ExperienceSerializer(
             experiences,
             many=True,
@@ -133,7 +133,7 @@ def experience_detail(request, experience_id):
 @permission_classes([IsAuthenticated])
 def experience_star(request, experience_id):
     experience = get_object_or_404(Experience, pk=experience_id)
-    if experience.stars.filter(pk=request.user.pk).exist():
+    if experience.stars.filter(pk=request.user.pk).exists():
         experience.stars.remove(request.user)
     else:
         experience.stars.add(request.user)

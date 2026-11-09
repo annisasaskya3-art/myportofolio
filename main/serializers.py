@@ -34,14 +34,12 @@ class ProjectSerializer(serializers.ModelSerializer):
         return strip_tags(value)
 
     def get_star_count(self, obj):
-        # Diubah dari starred_by menjadi stars sesuai models.py
         return obj.stars.count()
 
     def get_is_starred(self, obj):
         request = self.context.get("request")
         if request is None or not request.user.is_authenticated:
             return False
-        # Diubah dari starred_by menjadi stars
         return request.user in obj.stars.all()
 
     def get_starred_by_names(self, obj):
@@ -76,10 +74,10 @@ class ExperienceSerializer(serializers.ModelSerializer):
         model = Experience
         fields = [
             "id", "title", "description", "category", "category_label", 
-            "thumbnail", "stared_at", "ended_at", "is_ongoing", 
+            "thumbnail", "started_at", "ended_at", "is_ongoing", 
             "star_count", "is_starred", "can_edit", "can_delete",
         ]
-        read_only_field = ["id", "stared_at"]
+        read_only_field = ["id", "started_at"]
 
     @staticmethod
     def _clean_text(value, label):

@@ -335,7 +335,7 @@ class ExperienceAPITest(APITestCase):
         self.assertEqual(Experience.objects.count(), 1)
 
     def test_html_tags_are_stripped(self):
-        self.client.force_authenticated(user=self.owner)
+        self.client.force_authenticate(user=self.owner)
         response = self.client.post(self.list_url, {**self.payload, "title": "<b>Intern</b> Backend"}, format="json")
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data["title"], "Intern Backend")

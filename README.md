@@ -2,6 +2,88 @@ Nama: Annisa Saskya Aulia
 NPM: 2506537915 
 Kelas : PBP C 
 
+# My Personal Portfolio
+
+## Deskripsi Proyek
+
+Proyek ini merupakan website portofolio pribadi yang dikembangkan menggunakan Django sebagai bagian dari mata kuliah Pemrograman Berbasis Platform (PBP).
+
+Website ini berfungsi untuk menampilkan informasi pribadi dan hasil karya, serta menyediakan fitur pengelolaan data portofolio secara dinamis. Pengembangan dilakukan secara bertahap dengan menerapkan konsep pengembangan web, pengelolaan database, autentikasi dan otorisasi pengguna, hingga implementasi REST API menggunakan Django REST Framework.
+
+Beberapa fitur yang dikembangkan meliputi:
+- Menampilkan informasi dan konten portofolio.
+- Mengelola data portofolio melalui fitur tambah, lihat, ubah, dan hapus.
+- Menerapkan pembagian hak akses berdasarkan peran pengguna.
+- Memberikan fitur star pada konten tertentu.
+- Menggunakan AJAX dan Fetch API untuk berinteraksi dengan server tanpa perlu memuat ulang halaman.
+- Menyediakan REST API untuk mengakses dan mengelola data portofolio.
+
+## Teknologi yang Digunakan
+
+- **Python** sebagai bahasa pemrograman.
+- **Django** sebagai web framework.
+- **Django REST Framework** untuk implementasi REST API.
+- **SQLite** sebagai database pengembangan.
+- **HTML, CSS, dan JavaScript** untuk membangun antarmuka website.
+- **Fetch API dan AJAX** untuk komunikasi asynchronous antara frontend dan backend.
+- **Git dan GitHub** untuk version control dan penyimpanan kode.
+
+## Instruksi Setup
+
+### 1. Clone repository
+
+```bash
+git clone https://github.com/annisasaskya3-art/myportofolio.git
+cd myportofolio
+```
+
+### 2. Buat dan aktifkan virtual environment
+
+Untuk Windows PowerShell:
+
+```powershell
+python -m venv env
+.\env\Scripts\Activate.ps1
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Jalankan migrasi database
+
+```bash
+python manage.py migrate
+```
+
+### 5. Jalankan development server
+
+```bash
+python manage.py runserver
+```
+
+Website dapat diakses melalui:
+
+```text
+http://127.0.0.1:8000/
+```
+
+## Rangkuman Progress Mingguan
+
+| Tugas | Progress |
+|---|---|
+| Individual Assignment 1 – Static Web with HTML5 and CSS3 | Membangun website statis menggunakan HTML5 dan CSS3 sebagai fondasi awal pengembangan portofolio. |
+| Individual Assignment 2 – Implementasi MVT pada Django | Mengembangkan website menggunakan Django dengan menerapkan pola Model-View-Template (MVT). |
+| Individual Assignment 3 – Form & Data Delivery | Mengimplementasikan form untuk menerima input pengguna serta mempelajari proses pengiriman dan pengolahan data pada Django. |
+| Individual Assignment 4 – Authentication, Session and Cookies Implementation | Menerapkan autentikasi pengguna serta memahami pengelolaan session dan cookies dalam aplikasi web. |
+| Individual Assignment 5 – Web Interactivity with JavaScript | Mengembangkan interaktivitas website menggunakan JavaScript agar interaksi pengguna dengan halaman web menjadi lebih dinamis. |
+| Individual Assignment 6 – Django REST Framework Implementation | Mengimplementasikan REST API menggunakan Django REST Framework, termasuk serializer, validasi data, permission, autentikasi, serta pengujian endpoint API. |
+
+---
+
+
 ## Pertanyaan Reflektif Tugas 1
 1. Pada Tutorial dan Tugas 1, Anda diberi kebebasan untuk menentukan tampilan dari website portofolio Anda. Saat Anda merancang struktur HTML yang digunakan, apakah Anda menggunakan elemen semantik HTML5 seperti <section>, <article>, atau <aside>? Jika iya, bagaimana elemen tersebut membantu Anda dalam membuat static web? Jika tidak, mengapa tanpa elemen tersebut sudah memenuhi kebutuhan desain Anda?
 Jawab: Ya, saya menggunakan elemen semantik HTML5 seperti `<header>`, `<nav>`, `<main>`, `<section>`, `<article>`, dan `<footer>` dalam merancang struktur website portofolio ini. Ketika saya menggunakan elemen-elemen semantik tersebut, saya merasakan beberapa kegunaan yang membantu pekerjaan saya lebih meaningful dan rapi.
@@ -144,4 +226,73 @@ Dalam pengerjaan Assignment 4 ini, saya menggunakan bantuan AI (Gemini dan Claud
   - Claude tidak bisa menjalankan `runserver` di lingkungannya (tidak ada akses ke PyPI). JavaScript-nya diuji di Chromium dengan endpoint tiruan, tetapi Python/Django dan migrasi harus dijalankan dan diuji sendiri.
 - **Penyesuaian dan pengujian manual:** hasil kerja Claude dibaca, dijalankan, dan diuji di browser untuk peran superuser, Editor, user biasa, dan pengunjung, termasuk payload XSS `<img src="x" onerror="alert('XSS!')">` (daftar uji di bawah).
 
-**Checklist uji manual:** (1) pengunjung bisa melihat daftar, tidak ada tombol tambah; (2) pencarian hanya mengirim satu request setelah berhenti mengetik (tab Network); (3) superuser/Editor menambah data lewat modal dan daftar langsung ter-update; (4) user biasa yang mengirim POST langsung mendapat 403; (5) payload XSS ditolak (400) atau tampil sebagai teks, tanpa alert.
+### Tugas 6
+
+1. Jelaskan apa yang dimaksud dengan REST dan mengapa mengembalikan JSON saja belum cukup untuk menyebut sebuah API sebagai RESTful! Jelaskan pula perbedaan `PUT` dan `PATCH` beserta contoh kapan masing-masing sebaiknya digunakan!
+
+REST (*Representational State Transfer*) merupakan pendekatan dalam merancang API agar komunikasi antara client dan server dapat dilakukan secara terstruktur. Dalam REST, data atau objek yang dikelola disebut sebagai resource dan setiap resource memiliki alamat atau URL tersendiri. REST juga memanfaatkan HTTP method seperti `GET`, `POST`, `PUT`, `PATCH`, dan `DELETE` untuk menentukan tindakan apa yang ingin dilakukan terhadap resource tersebut.
+
+Mengembalikan data dalam format JSON saja belum cukup untuk menyebut sebuah API sebagai RESTful. JSON hanya merupakan format pertukaran data, sedangkan REST memiliki prinsip dan aturan dalam mengatur komunikasi antara client dan server sehingga API yang mengembalikan JSON belum tentu mengikuti prinsip REST. Sebuah API perlu memperhatikan penggunaan URL untuk mengidentifikasi resource, HTTP method yang sesuai dengan tindakan yang dilakukan, serta HTTP status code untuk menunjukkan hasil dari suatu request.
+
+Perbedaan antara `PUT` dan `PATCH` terletak pada cara keduanya memperbarui data. `PUT` digunakan untuk memperbarui representasi resource secara keseluruhan, sedangkan `PATCH` digunakan apabila hanya sebagian data yang ingin diperbarui.
+
+Sebagai contoh, jika sebuah data pengalaman memiliki field `title`, `description`, dan `category`, penggunaan `PUT` berarti client mengirimkan representasi data secara lengkap ketika melakukan pembaruan. Sementara itu, jika hanya ingin mengganti `title`, client dapat menggunakan `PATCH` tanpa harus mengirimkan seluruh field lainnya. Dengan demikian, `PUT` lebih sesuai untuk pembaruan keseluruhan resource, sedangkan `PATCH` lebih praktis untuk perubahan pada field tertentu saja.
+
+2. Jelaskan peran serializer pada Django REST Framework! Apa keuntungannya dibandingkan merakit dictionary secara manual dengan `JsonResponse` seperti pada Tutorial 05?
+
+Serializer merupakan komponen dalam Django REST Framework yang berfungsi untuk mengubah data dari model Django menjadi format yang dapat dikirim melalui API, seperti JSON. Selain itu, serializer juga bertugas memeriksa dan memvalidasi data yang dikirimkan oleh client sebelum data tersebut diproses atau disimpan ke database.
+
+Dalam proyek ini, saya menggunakan `ModelSerializer` untuk mengelola data Experience. Dengan `ModelSerializer`, struktur field dapat disesuaikan dengan model yang sudah dibuat sehingga proses pengelolaan data menjadi lebih terorganisasi. Saya juga dapat menentukan field yang hanya boleh dibaca (*read-only*), seperti `star_count` dan `is_starred`, karena kedua field tersebut merupakan informasi hasil perhitungan yang tidak seharusnya diubah secara langsung oleh client.
+
+Dibandingkan dengan membuat dictionary secara manual menggunakan `JsonResponse` seperti pada Tutorial 05, penggunaan serializer memberikan beberapa keuntungan. Pada pendekatan manual, developer harus menentukan sendiri data yang akan dimasukkan ke dalam dictionary serta mengatur validasinya. Jika jumlah field bertambah, proses tersebut dapat menjadi lebih panjang dan sulit dikelola.
+
+Dengan serializer, proses konversi data, pengaturan field, dan validasi dapat dilakukan dengan lebih terstruktur. Hal ini membuat kode lebih mudah dibaca, dikembangkan, dan dipelihara, terutama ketika API memiliki banyak jenis data dan operasi.
+
+3. Jelaskan perbedaan autentikasi dan otorisasi pada Django REST Framework! Mengapa hak akses harus diperiksa dengan permission class di server, bukan hanya dengan menyembunyikan tombol di template?
+
+Autentikasi (*authentication*) merupakan proses untuk memastikan identitas pengguna yang mengakses aplikasi. Dalam Django REST Framework, proses ini digunakan untuk mengetahui apakah pengguna sudah terautentikasi dan akun mana yang sedang melakukan request.
+
+Sementara itu, otorisasi (*authorization*) merupakan proses untuk menentukan tindakan apa saja yang boleh dilakukan oleh pengguna berdasarkan hak akses atau perannya. Sebagai contoh, pada proyek ini terdapat beberapa tingkat hak akses, yaitu pengunjung anonim yang hanya dapat melihat data, pengguna biasa (dengan catatan sang pengguna sudah login) yang dapat melihat data dan memberikan atau membatalkan star, Editor yang memiliki tambahan hak untuk mengubah data, serta pemilik portofolio yang memiliki seluruh hak akses termasuk membuat dan menghapus data.
+
+Pemeriksaan hak akses perlu dilakukan di sisi server menggunakan permission class karena menyembunyikan tombol pada template hanya memengaruhi tampilan antarmuka. Hal tersebut tidak benar-benar mencegah pengguna melakukan request secara langsung ke endpoint API. Pengguna masih dapat mencoba mengirimkan request melalui browser console atau aplikasi lain meskipun tombol tertentu tidak ditampilkan pada halaman.
+
+Oleh karena itu, server tetap harus memeriksa izin setiap kali menerima request. Dengan menggunakan permission class, aturan hak akses dapat diterapkan secara konsisten sehingga pengguna hanya dapat melakukan tindakan yang memang diperbolehkan untuk perannya. Hal ini juga membuat pengaturan keamanan lebih terstruktur karena logika hak akses tidak hanya bergantung pada tampilan frontend.
+
+4. Jelaskan mengapa permintaan yang mengubah data tetap memerlukan token CSRF ketika API memakai `SessionAuthentication`! Mengapa test yang memakai `force_authenticate` tidak cukup untuk membuktikan bahwa perlindungan CSRF berjalan?
+
+CSRF (*Cross-Site Request Forgery*) merupakan jenis serangan yang memanfaatkan kondisi ketika pengguna sedang login pada suatu website untuk membuat browser mengirimkan request yang tidak diinginkan ke website tersebut.
+
+Pada Django REST Framework, `SessionAuthentication` menggunakan session pengguna untuk melakukan autentikasi. Karena browser dapat mengirimkan cookie session secara otomatis, terdapat kemungkinan website lain mencoba memanfaatkan session tersebut untuk mengirimkan request tanpa sepengetahuan pengguna.
+
+Oleh karena itu, token CSRF diperlukan sebagai perlindungan tambahan, terutama untuk request yang mengubah data seperti `POST`, `PUT`, `PATCH`, dan `DELETE`. Token ini membantu server memastikan bahwa request yang mengubah data berasal dari konteks aplikasi yang sah, bukan sekadar request yang dikirim dengan memanfaatkan cookie session pengguna.
+
+Pengujian menggunakan `force_authenticate` saja tidak cukup untuk membuktikan bahwa perlindungan CSRF berjalan karena metode tersebut secara langsung mengatur pengguna yang dianggap sudah terautentikasi dalam test. Dengan demikian, proses autentikasi normal melalui `SessionAuthentication` yang berkaitan dengan pemeriksaan CSRF tidak benar-benar diuji.
+
+Untuk menguji perlindungan CSRF, diperlukan `APIClient` dengan `enforce_csrf_checks=True` dan autentikasi melalui session, misalnya menggunakan `.login()`. Setelah itu, request yang mengubah data dapat dicoba tanpa menyertakan token CSRF. Apabila perlindungan berjalan dengan benar, request tersebut seharusnya ditolak oleh server.
+
+### AI Disclosure
+
+Dalam pengerjaan Individual Assignment 6, saya menggunakan ChatGPT dan Claude AI sebagai alat bantu untuk memahami materi dan membantu proses pengembangan aplikasi menggunakan Django REST Framework serta memahami dengan baik goals yang harus dicapai pada Individual Assignment 6 ini.
+
+ChatGPT digunakan untuk membantu menjelaskan konsep REST API, serializer, permission class, autentikasi, otorisasi, validasi data, serta perlindungan CSRF. Sedangkan Claude AI saya gunakan untuk membantu dalam membaca pesan error, memahami kemungkinan penyebab masalah, dan memberikan arahan ketika melakukan implementasi maupun pengujian fitur API.
+
+Strategi yang saya gunakan adalah memberikan konteks proyek, mengirimkan potongan kode atau pesan error yang ditemukan, kemudian meminta penjelasan dan arahan secara bertahap. Saya juga meminta penjelasan mengenai fungsi setiap bagian kode agar dapat memahami alasan penggunaannya, bukan hanya menyalin implementasi yang diberikan.
+
+Berikut merupakan ringkasan prompt yang digunakan selama pengerjaan Tugas 6:
+
+| No. | AI Tool | Ringkasan Prompt | Tujuan Penggunaan |
+|---|---|---|---|
+| 1 | ChatGPT | Meminta penjelasan mengenai konsep REST API, serializer, dan perbedaan antara serialisasi dengan validasi data secara umum. | Memahami konsep dasar Django REST Framework sebelum mengimplementasikannya. |
+| 2 | ChatGPT | Meminta panduan bertahap untuk memahami dan mengimplementasikan permission class serta pembagian hak akses berdasarkan role pengguna. | Membantu menerapkan aturan akses untuk anonymous user, authenticated user, Editor, dan portfolio owner. |
+| 3 | ChatGPT | Meminta bantuan memahami validasi input menggunakan `validate_<field>` dan fungsi `strip_tags`. | Memastikan data yang diterima API divalidasi dan tidak mengandung HTML tags yang tidak diinginkan. |
+| 4 | ChatGPT | Meminta bantuan memahami error yang muncul selama implementasi dan pengujian API, disertai potongan kode atau pesan error yang relevan. | Mengidentifikasi penyebab error dan menentukan langkah perbaikan. |
+| 5 | ChatGPT | Meminta penjelasan mengenai perbedaan PUT dan PATCH, authentication dan authorization, serta mekanisme CSRF pada SessionAuthentication. | Memahami konsep yang diperlukan untuk menjawab pertanyaan reflektif Tugas 6. |
+| 6 | Claude | Meminta bantuan menganalisis kode dan error yang muncul selama pengerjaan, serta mendapatkan arahan untuk implementasi dan pengujian. | Membantu proses debugging dan memahami solusi yang dapat diterapkan pada proyek. |
+
+**Strategi penggunaan AI:**
+
+Saya memberikan konteks proyek, potongan kode, serta pesan error yang ditemukan agar AI dapat memberikan bantuan yang relevan. Saya juga meminta penjelasan mengenai konsep yang belum dipahami, bukan hanya meminta kode jadi.
+
+**Kontribusi mandiri:**
+
+Saya menyadari bahwa jawaban dan saran dari AI tidak selalu langsung sesuai dengan kondisi proyek. Beberapa saran perlu diperiksa kembali dan disesuaikan dengan struktur model, URL, serta implementasi yang sudah ada. Oleh karena itu, ChatGPT dan Claude AI digunakan sebagai pendamping belajar dan debugging, sedangkan keputusan akhir mengenai kode dan hasil implementasi tetap melalui pemeriksaan serta pengujian pada proyek saya sendiri.
