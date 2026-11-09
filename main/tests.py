@@ -96,12 +96,17 @@ class ExperienceAjaxTest(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertEqual(Experience.objects.count(), 1)
 
-    def test_superuser_and_editor_can_add(self):
-        for username in ("owner", "editor"):
-            self.client.login(username=username, password="pw12345!")
-            response = self.client.post(reverse("main:create_experience_ajax"), self.payload)
-            self.assertEqual(response.status_code, 201)
-        self.assertEqual(Experience.objects.count(), 3)
+    def test_superuser_can_add(self):
+        self.client.login(username="owner", password="pw12345!")
+        response = self.client.post(reverse("main:create_experience_ajax"), self.payload)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Experience.objects.count(), 2)
+
+    def test_editor_cannot_add(self):
+        self.client.login(username="editor", password="pw12345!")
+        response = self.client.post(reverse("main:create_experience_ajax"), self.payload)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(Experience.objects.count(), 1)
 
     def test_invalid_input_returns_400_with_errors(self):
         self.client.login(username="owner", password="pw12345!")

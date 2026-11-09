@@ -41,15 +41,19 @@ def can_manage_experience(user):
     """Peran yang boleh menambah/mengubah Experience (Tugas 4): superuser atau grup Editor."""
     return user.is_authenticated and (user.is_superuser or is_editor(user))
 
+def can_create_experience(user):
+    """Tugas 6: hanya pemilik portofolio (superuser) yang boleh membuat Experience."""
+    return user.is_authenticated and user.is_superuser
 
 @ensure_csrf_cookie  # pastikan cookie csrftoken ada agar fetch POST (star/hapus) bisa memakai X-CSRFToken
 def show_experience(request):
     """Hanya merender kerangka halaman; data dimuat lewat AJAX dari get_experience_json."""
-    can_add = can_manage_experience(request.user)
+    can_edit = can_manage_experience(request.user)
     context = {
         "name": "Annisa Saskya Aulia",
-        "can_add": can_add,
-        "form": ExperienceForm() if can_add else None,
+        "can_add": can_create_experience(request.user),
+        "can_edit": can_edit,
+        "form": ExperienceForm() if can_edit else None,
     }
     return render(request, "experience.html", context)
 
@@ -57,6 +61,8 @@ def show_experience(request):
 def create_experience(request):
     if not (request.user.is_superuser or is_editor(request.user)):
         return HttpResponseForbidden("403 Forbidden: Anda tidak memiliki akses.")
+    if not can_create_experience(request.user):
+        return HttpResponseForbidden("403 Forbidden: Hanya pemilik portofolio yang dapat menambah data.")
     
     form = ExperienceForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -363,6 +369,8 @@ def create_experience_ajax(request):
             {"message": "Anda tidak memiliki akses untuk menambah pengalaman."},
             status=403,
         )
+    if not can_create_experience(request.user):
+        return HttpResponseForbidden("403 Forbidden: Hanya pemilik portofolio yang dapat menambah data.")
 
     form = ExperienceForm(request.POST)
     if form.is_valid():
