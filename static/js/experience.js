@@ -12,7 +12,6 @@
   const DEBOUNCE_MS = 400;
   const urls = {
     list: root.dataset.listUrl,
-    add: root.dataset.addUrl,
     login: root.dataset.loginUrl,
   };
   const isAuthenticated = root.dataset.authenticated === 'true';
@@ -34,9 +33,14 @@
   const modal = document.getElementById('experience-modal');
   const openModalButton = document.getElementById('experience-open-modal');
   const addForm = document.getElementById('experience-form');
+  const modalTitle = document.getElementById('experience-modal-title');
 
   let debounceTimer = null;
   let latestRequestId = 0; // mencegah respons lama menimpa respons baru
+  
+  const FIELDS = ['title', 'description', 'category', 'thumbnail'];
+  const experiencesById = new Map(); // untuk mengisi modal edit tanpa fetch ulang
+  let editingId = null;              // null = mode tambah, selain itu = mode edit
 
   // ---------- 2. State UI ----------
   function showState(name) {
@@ -87,7 +91,10 @@
     const thumbHtml = thumb
       ? `<img src="${escapeHtml(thumb)}" alt="" class="exp-card__thumb" loading="lazy">`
       : '';
-    const editBtn = ''; // dipasang lagi di Commit 8 (modal edit)
+    const editBtn = exp.can_edit
+      ? `<button type="button" class="pa-btn pa-btn--edit" data-action="edit"
+                 data-id="${escapeHtml(exp.id)}">Edit</button>`
+      : '';
     const deleteBtn = exp.can_delete
       ? `<button type="button" class="pa-btn pa-btn--danger" data-action="delete"
                  data-id="${escapeHtml(exp.id)}">Hapus</button>`
@@ -121,6 +128,9 @@
     try {
       const data = await fetchExperiences(query);
       if (requestId !== latestRequestId) return;
+
+      experiencesById.clear();
+      data.forEach((exp) => experiencesById.set(exp.id, exp));
 
       if (!data.length) {
         emptyMessage.textContent = query
@@ -200,55 +210,69 @@
     if (!button) return;
     if (button.dataset.action === 'star') handleStar(button);
     if (button.dataset.action === 'delete') handleDelete(button);
+    if (button.dataset.action === 'edit' && modal) openModal(experiencesById.get(button.dataset.id));
   });
 
-  // ---------- 5. Modal tambah data ----------
+   // ---------- 5. Modal tambah & edit data ----------
   function clearFieldErrors() {
     addForm.querySelectorAll('[data-error-for]').forEach((el) => { el.textContent = ''; });
   }
 
+  // Error 400 DRF berbentuk {field: ["pesan", ...]}
   function showFieldErrors(errors) {
-    const lines = [];
-    Object.entries(errors || {}).forEach(([field, items]) => {
-      const messages = items.map((item) => item.message);
-      const slot = addForm.querySelector(`[data-error-for="${field}"]`);
-      if (slot) slot.textContent = messages.join(' '); // textContent -> aman dari XSS
-      lines.push(`${field}: ${messages.join(' ')}`);
+    addForm.querySelectorAll('[data-error-for]').forEach((el) => {
+      el.textContent = [].concat((errors || {})[el.dataset.errorFor] || []).join(' '); // textContent -> aman XSS
     });
-    return lines.join('\n');
+  }
+
+  function openModal(exp = null) {
+    editingId = exp ? exp.id : null;
+    addForm.reset();
+    clearFieldErrors();
+    modalTitle.textContent = exp ? 'Edit Experience' : 'Tambah Experience';
+    if (exp) {
+      FIELDS.forEach((name) => { addForm.elements[name].value = exp[name] || ''; });
+    }
+    modal.showModal();
   }
 
   function closeModal() {
     if (modal && modal.open) modal.close();
   }
 
-  // Listener hanya dipasang jika elemennya ada (pengunjung/peran lain tidak punya modal).
-  if (openModalButton && modal) {
-    openModalButton.addEventListener('click', () => modal.showModal());
+  // Modal ada untuk pemilik & Editor; tombol "Tambah" hanya untuk pemilik -> keduanya bisa null.
+  if (modal) {
     modal.querySelectorAll('[data-close-modal]').forEach((el) => el.addEventListener('click', closeModal));
-    // klik pada backdrop (di luar kotak dialog) menutup modal
     modal.addEventListener('click', (event) => { if (event.target === modal) closeModal(); });
   }
+  if (openModalButton) openModalButton.addEventListener('click', () => openModal());
 
   if (addForm) {
     addForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       clearFieldErrors();
+
+      const body = Object.fromEntries(FIELDS.map((name) => [name, addForm.elements[name].value.trim()]));
+      const isEdit = editingId !== null;
       const submitButton = addForm.querySelector('button[type="submit"]');
       submitButton.disabled = true;
       try {
-        // FormData sudah memuat csrfmiddlewaretoken dari {% csrf_token %}; header X-CSRFToken ikut dikirim juga.
-        const { response, data } = await postRequest(urls.add, new FormData(addForm));
-        if (response.status === 201) {
+        // Edit = PUT (form mengirim semua field), tambah = POST ke daftar.
+        const { response, data } = await apiRequest(
+          isEdit ? detailUrl(editingId) : urls.list,
+          { method: isEdit ? 'PUT' : 'POST', body },
+        );
+        if (response.ok) { // 201 (dibuat) atau 200 (diperbarui)
           closeModal();
-          addForm.reset();
-          showToast('Berhasil', data.message || 'Pengalaman berhasil ditambahkan.', 'success');
-          searchInput.value = '';          // tampilkan semua data agar item baru terlihat
-          loadExperiences('');             // perbarui daftar tanpa reload halaman
+          showToast('Berhasil', isEdit ? 'Pengalaman diperbarui.' : 'Pengalaman berhasil ditambahkan.', 'success');
+          if (!isEdit) searchInput.value = ''; // tampilkan semua agar item baru terlihat
+          loadExperiences(currentQuery());
         } else if (response.status === 400) {
-          showToast('Data tidak valid', showFieldErrors(data.errors) || data.message, 'error');
+          showFieldErrors(data);
+          showToast('Data tidak valid', describeApiError(data, 'Periksa kembali isian Anda.'), 'error');
         } else {
-          showToast('Gagal', data.message || `Terjadi kesalahan (HTTP ${response.status}).`, 'error');
+          showToast(response.status === 403 ? 'Tidak diizinkan' : 'Gagal',
+                    describeApiError(data, `HTTP ${response.status}`), 'error');
         }
       } catch (err) {
         showToast('Gagal', 'Terjadi kesalahan jaringan.', 'error');
