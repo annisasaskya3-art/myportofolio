@@ -317,3 +317,80 @@ class ExperienceAPITest(APITestCase):
         self.assertEqual([i["title"] for i in response.data], ["Research Assistant"])
         self.assertEqual(len(self.client.get(self.list_url, {"q": "internship"}).data), 1)
         self.assertEqual(self.client.get(self.list_url, {"q": "tidak-ada"}).data, [])
+
+    def test_invalid_input_returns_400(self):
+        self.client.force_authenticate(user=self.owner)
+        cases = [
+            ({"title": "   "}, "title"),
+            ({"title": '<img src="x" onerror="alert(1)">'}, "title"),
+            ({"description": "<b></b>"}, "description"),
+            ({"category": "bukan-kategori"}, "category"),
+            ({"thumbnail": "javascript:alert(1)"}, "thumbnail"),
+        ]
+        for changes, field in cases:
+            with self.subTest(field=field, changes=changes):
+                response = self.client.post(self.list_url, {**self.payload, **changes}, format="json")
+                self.assertEqual(response.status_code, 400)
+                self.assertIn(field, response.data)
+        self.assertEqual(Experience.objects.count(), 1)
+
+    def test_html_tags_are_stripped(self):
+        self.client.force_authenticated(user=self.owner)
+        response = self.client.post(self.list_url, {**self.payload, "title": "<b>Intern</b> Backend"}, format="json")
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["title"], "Intern Backend")
+
+    def test_computed_fields_cannot_be_forged(self):
+        self.client.force_authenticate(user=self.owner)
+        response = self.client.post(
+            self.list_url,
+            {**self.payload, "star_count": 99, "is_starred": True, "can_delete": True,
+             "started_at": "2000-01-01T00:00:00Z"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["star_count"], 0)
+        self.assertFalse(response.data["is_starred"])
+        created = Experience.objects.get(pk=response.data["id"])
+        self.assertEqual(created.stars.count(), 0)
+        self.assertNotEqual(created.started_at.year, 2000)
+
+    def test_response_has_no_account_data(self):
+        self.exp.stars.add(self.member)
+        keys = set(self.client.get(self.detail_url).data)
+        self.assertTrue(keys.isdisjoint({"email", "password", "username"}))
+
+    def test_star_requires_login(self):
+        self.assertEqual(self.client.post(self.star_url).status_code, 403)
+        self.assertEqual(self.exp.stars.count(), 0)
+
+    def test_star_toggles_for_request_user_only(self):
+        self.client.force_authenticate(user=self.member)
+        response = self.client.post(self.star_url, {"user": self.owner.pk}, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data["is_starred"])
+        self.assertEqual(response.data["star_count"], 1)
+        self.assertEqual(list(self.exp.stars.all()), [self.member])
+        response = self.client.post(self.star_url)
+        self.assertFalse(response.data["is_starred"])
+        self.assertEqual(self.exp.stars.count(), 0)
+
+    def test_star_unknown_experience_returns_404(self):
+        self.client.force_authenticate(user=self.member)
+        url = reverse("api:experience-star", args=[uuid.uuid4()])
+        self.assertEqual(self.client.post(url).status_code, 404)
+
+    def test_write_without_csrf_token_is_rejected(self):
+        client = APIClient(enforce_csrf_checks=True)
+        self.assertTrue(client.login(username="owner_exp", password="pw12345!"))
+        response = client.post(self.list_url, self.payload, format="json")
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(Experience.objects.count(), 1)
+
+    def test_write_with_csrf_token_succeeds(self):
+        client = APIClient(enforce_csrf_checks=True)
+        self.assertTrue(client.login(username="owner_exp", password="pw12345!"))
+        client.get(reverse("main:show_experience"))  # @ensure_csrf_cookie menyetel cookie
+        token = client.cookies["csrftoken"].value
+        response = client.post(self.list_url, self.payload, format="json", HTTP_X_CSRFTOKEN=token)
+        self.assertEqual(response.status_code, 201)
